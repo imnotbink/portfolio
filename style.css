@@ -9,8 +9,15 @@
 */
 
 :root {
-  --primary-color: #081c24;
-  --secondary-color: #007acc;
+  /*
+    Colour palette tuned for a subtle UNC‑Chapel Hill theme.  The header
+    and footer now use a rich navy inspired by Carolina athletics, while
+    links and accents pick up the lighter “Carolina blue.”  These
+    variables make it easy to tweak the look without touching the
+    rest of the stylesheet.
+  */
+  --primary-color: #13294B; /* dark UNC navy */
+  --secondary-color: #4B9CD3; /* Carolina blue accent */
   --background-light: #f9f9f9;
   --text-color: #333;
   --max-width: 1000px;
@@ -137,4 +144,20 @@ footer {
   text-align: center;
   padding: 1rem 0;
   font-size: 0.9rem;
+}
+
+/*
+  Profile photo styling
+
+  The portrait of Tyler appears in the About section.  A fixed width
+  keeps it manageable on large screens, while max-width ensures it
+  scales down gracefully on mobile.  The slight border radius softens
+  the edges for a polished look, and a bottom margin separates it
+  from the body text.
+*/
+.profile-photo {
+  width: 200px;
+  max-width: 100%;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }
