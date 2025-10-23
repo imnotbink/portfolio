@@ -1,0 +1,140 @@
+/*
+  Stylesheet for Tyler Schrimper’s portfolio.
+
+  This CSS defines a clean, modern layout that scales to different
+  screen sizes using flex and grid layouts. Colours are kept neutral
+  with a dark header/footer to frame the content and lighter panels
+  for the body. Feel free to adjust colours or spacing to better
+  reflect personal branding.
+*/
+
+:root {
+  --primary-color: #081c24;
+  --secondary-color: #007acc;
+  --background-light: #f9f9f9;
+  --text-color: #333;
+  --max-width: 1000px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background: #fff;
+}
+
+header {
+  background: var(--primary-color);
+  color: #fff;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.75rem;
+  font-weight: 600;
+}
+
+header .tagline {
+  margin: 0.5rem 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: #e2e8f0;
+}
+
+nav a {
+  color: #e2e8f0;
+  margin: 0 0.75rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+nav a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.container {
+  width: 90%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+section {
+  padding: 4rem 0;
+}
+
+section h2 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: 600;
+  border-bottom: 2px solid #e5e5e5;
+  padding-bottom: 0.5rem;
+}
+
+.work .projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.project-card {
+  background: var(--background-light);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.project-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.project-card h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.25rem;
+  color: var(--primary-color);
+}
+
+.project-card p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+#music audio {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+#contact .email-link {
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+
+#contact .email-link:hover {
+  text-decoration: underline;
+}
+
+footer {
+  background: var(--primary-color);
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+}
