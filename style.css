@@ -194,15 +194,12 @@ section h2 {
   width: 100%;
   margin-top: 1rem;
 }
-
 #contact .email-link {
-  color: var(--secondary-color);
-  text-decoration: none;
+    color: var(--secondary-color);
+    text-decoration: none;
 }
-
 #contact .email-link:hover {
-  text-decoration: underline;
-}
+    text-decoration: underline;
 
 footer {
   background: var(--primary-color);
@@ -225,5 +222,8 @@ footer {
   width: 200px;
   max-width: 100%;
   border-radius: 8px;
+    display: block;
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 1rem;
 }
