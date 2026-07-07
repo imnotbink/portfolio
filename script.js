@@ -1,89 +1,77 @@
-// imnotbink beat shelf — generative album covers, one shared audio player
+// imnotbink — vinyl turntable + crate. One shared audio player.
+// Catalog: the Desktop "for sell type shit" exports. Credit format is
+// always "prod. imnotbink" first, collabs joined with ×.
 
 const BEATS = [
-  { file: "beats/enjoy.mp3",        title: "enjoy",        meta: "warm · melodic",      price: 40 },
-  { file: "beats/harmonix-pt2.mp3", title: "harmonix pt. 2", meta: "lush · continued",  price: 40 },
-  { file: "beats/threesixty.mp3",   title: "threesixty",   meta: "spinning · trap",     price: 40 },
-  { file: "beats/popstar.mp3",      title: "popstar",      meta: "143 BPM · melodic",   price: 30 },
-  { file: "beats/coffee.mp3",       title: "coffee",       meta: "smooth · warm keys",  price: 25 },
-  { file: "beats/coldness.mp3",     title: "coldness",     meta: "dark · atmospheric",  price: 25 },
-  { file: "beats/cheerleader.mp3",  title: "cheerleader",  meta: "bouncy · club",       price: 30 },
-  { file: "beats/transformer.mp3",  title: "transformer",  meta: "heavy · glitch",      price: 25 },
-  { file: "beats/zigzag.mp3",       title: "zigzag",       meta: "off-kilter · trap",   price: 25 },
-  { file: "beats/leopard.mp3",      title: "leopard",      meta: "aggressive · 808s",   price: 30 },
-  { file: "beats/quarterback.mp3",  title: "quarterback",  meta: "hard-hitting · trap", price: 25 },
+  { file: "beats/ender.mp3",            title: "ender",            meta: "155 BPM · E min",  prod: ["imnotbink", "schell"] },
+  { file: "beats/spaz.mp3",             title: "spaz",             meta: "126 BPM · E maj",  prod: ["imnotbink"] },
+  { file: "beats/hairbrush.mp3",        title: "hairbrush",        meta: "141 BPM · D♯ min", prod: ["imnotbink", "schell", "dxnieldior"] },
+  { file: "beats/jukuri.mp3",           title: "jukuri",           meta: "174 BPM · A min",  prod: ["imnotbink", "zouni"] },
+  { file: "beats/popit.mp3",            title: "popit",            meta: "",                 prod: ["imnotbink"] },
+  { file: "beats/relentless-hope.mp3",  title: "relentless hope",  meta: "",                 prod: ["imnotbink", "schell"] },
+  { file: "beats/umbrae-loquuntur.mp3", title: "umbrae loquuntur", meta: "",                 prod: ["imnotbink"] },
+  { file: "beats/boomerang.mp3",        title: "boomerang",        meta: "140 BPM · F♯ min", prod: ["imnotbink"] },
+  { file: "beats/coupe.mp3",            title: "coupe",            meta: "",                 prod: ["imnotbink"] },
+  { file: "beats/digital-runner.mp3",   title: "digital runner",   meta: "",                 prod: ["imnotbink"] },
+  { file: "beats/grail.mp3",            title: "grail",            meta: "",                 prod: ["imnotbink"] },
+  { file: "beats/tethered.mp3",         title: "tethered",         meta: "148 BPM · A maj",  prod: ["imnotbink"] },
+  { file: "beats/in-elsewhere.mp3",     title: "in elsewhere",     meta: "152 BPM",          prod: ["imnotbink", "wa"] },
+  { file: "beats/natural.mp3",          title: "natural",          meta: "",                 prod: ["imnotbink"] },
+  { file: "beats/pretty.mp3",           title: "pretty",           meta: "",                 prod: ["imnotbink"] },
+  { file: "beats/run-run.mp3",          title: "run run",          meta: "140 BPM",          prod: ["imnotbink", "wa"] },
+  { file: "beats/silver.mp3",           title: "silver",           meta: "147 BPM · A maj",  prod: ["imnotbink"] },
+  { file: "beats/stampede.mp3",         title: "stampede",         meta: "",                 prod: ["imnotbink"] },
+  { file: "beats/timetraveler.m4a",     title: "timetraveler",     meta: "140 BPM · A maj",  prod: ["imnotbink"] },
 ];
 
+const PRICE = 30;
 const EMAIL = "tylerschrimper@gmail.com";
+const credit = (b) => "prod. " + b.prod.join(" × ");
 
-// ---------- generative cover art ----------
-// deterministic per beat: palette + geometric motif, minimal record-sleeve style
+// ---------- generative label art (record-sleeve palettes) ----------
 
 const PALETTES = [
-  ["#1c1a2e", "#e8a33d", "#f2ede4"], // night / amber
-  ["#0f2e2b", "#7fc8a9", "#f2ede4"], // deep green / sage
-  ["#2e1220", "#e05e4e", "#f4d8c5"], // plum / coral
-  ["#14213d", "#90b4d8", "#fca311"], // navy / sky / marigold
-  ["#262019", "#c9ada7", "#e8d5b5"], // umber / clay
-  ["#101418", "#5a7d9a", "#dbe4ee"], // slate / steel
-  ["#332a1e", "#d9ae61", "#f0e6d2"], // bronze / sand
-  ["#1e1e24", "#9d8cd6", "#eae6f5"], // charcoal / lilac
-  ["#0d2818", "#4e9f3d", "#e8f0e2"], // forest
-  ["#2b0f0f", "#c94f4f", "#f0dcd2"], // oxblood
-  ["#131c26", "#3fa7a3", "#e6f2f0"], // teal night
+  ["#1c1a2e", "#e8a33d", "#f2ede4"], ["#0f2e2b", "#7fc8a9", "#f2ede4"],
+  ["#2e1220", "#e05e4e", "#f4d8c5"], ["#14213d", "#90b4d8", "#fca311"],
+  ["#262019", "#c9ada7", "#e8d5b5"], ["#101418", "#5a7d9a", "#dbe4ee"],
+  ["#332a1e", "#d9ae61", "#f0e6d2"], ["#1e1e24", "#9d8cd6", "#eae6f5"],
+  ["#0d2818", "#4e9f3d", "#e8f0e2"], ["#2b0f0f", "#c94f4f", "#f0dcd2"],
+  ["#131c26", "#3fa7a3", "#e6f2f0"],
 ];
 
-function motif(i, [bg, fg, hi]) {
+function motif(i, [, fg, hi]) {
   const shapes = [
-    // 0: sun over horizon lines
-    `<circle cx="200" cy="150" r="80" fill="${fg}"/>
-     ${[210, 235, 260, 285, 310].map(y => `<rect x="40" y="${y}" width="320" height="6" fill="${hi}" opacity="${1 - (y - 210) / 140}"/>`).join("")}`,
-    // 1: concentric arcs
-    `${[150, 115, 80, 45].map((r, j) => `<path d="M ${200 - r} 240 A ${r} ${r} 0 0 1 ${200 + r} 240" fill="none" stroke="${j % 2 ? fg : hi}" stroke-width="14"/>`).join("")}`,
-    // 2: orbit rings
-    `<circle cx="200" cy="200" r="130" fill="none" stroke="${fg}" stroke-width="2"/>
-     <circle cx="200" cy="200" r="90" fill="none" stroke="${fg}" stroke-width="2"/>
-     <circle cx="200" cy="200" r="50" fill="${hi}"/>
-     <circle cx="290" cy="110" r="16" fill="${fg}"/>`,
-    // 3: vertical bars, staggered
-    `${[0, 1, 2, 3, 4, 5, 6].map(j => `<rect x="${52 + j * 44}" y="${100 + Math.abs(3 - j) * 30}" width="24" height="${220 - Math.abs(3 - j) * 40}" rx="12" fill="${j % 2 ? fg : hi}"/>`).join("")}`,
-    // 4: crescent moon
-    `<circle cx="200" cy="190" r="105" fill="${hi}"/>
-     <circle cx="245" cy="160" r="95" fill="${bg}"/>
-     <circle cx="120" cy="310" r="8" fill="${fg}"/><circle cx="300" cy="300" r="5" fill="${fg}"/><circle cx="80" cy="90" r="5" fill="${fg}"/>`,
-    // 5: sine wave stack
-    `${[140, 185, 230, 275].map((y, j) => `<path d="M 40 ${y} Q 120 ${y - 45} 200 ${y} T 360 ${y}" fill="none" stroke="${j % 2 ? fg : hi}" stroke-width="10" stroke-linecap="round"/>`).join("")}`,
-    // 6: checker window
-    `${[0, 1, 2, 3].map(r => [0, 1, 2, 3].map(c => (r + c) % 2 === 0 ? `<rect x="${100 + c * 50}" y="${100 + r * 50}" width="50" height="50" fill="${(r * 4 + c) % 3 ? fg : hi}"/>` : "").join("")).join("")}`,
-    // 7: diagonal beams
-    `<g transform="rotate(-30 200 200)">${[120, 170, 220, 270].map((y, j) => `<rect x="-60" y="${y}" width="520" height="22" fill="${j % 2 ? fg : hi}"/>`).join("")}</g>`,
-    // 8: eclipse
-    `<circle cx="200" cy="185" r="110" fill="${fg}"/>
-     <circle cx="200" cy="185" r="110" fill="none" stroke="${hi}" stroke-width="3"/>
-     <ellipse cx="200" cy="320" rx="140" ry="10" fill="${hi}" opacity="0.6"/>`,
-    // 9: scattered dots grid
-    `${[0, 1, 2, 3, 4].map(r => [0, 1, 2, 3, 4].map(c => `<circle cx="${90 + c * 55}" cy="${90 + r * 55}" r="${((r * 5 + c * 3 + i) % 4) * 4 + 5}" fill="${(r + c) % 2 ? fg : hi}"/>`).join("")).join("")}`,
-    // 10: mountain cuts
-    `<polygon points="40,320 160,120 240,240 300,150 360,320" fill="${fg}"/>
-     <polygon points="140,320 250,180 360,320" fill="${hi}" opacity="0.85"/>
-     <circle cx="105" cy="105" r="28" fill="${hi}"/>`,
+    `<circle cx="200" cy="200" r="150" fill="none" stroke="${fg}" stroke-width="8"/><circle cx="200" cy="200" r="110" fill="none" stroke="${hi}" stroke-width="4"/>`,
+    `${[0, 60, 120].map(a => `<g transform="rotate(${a} 200 200)"><ellipse cx="200" cy="200" rx="160" ry="60" fill="none" stroke="${fg}" stroke-width="4"/></g>`).join("")}`,
+    `${[0, 45, 90, 135].map(a => `<rect x="188" y="40" width="24" height="90" rx="12" transform="rotate(${a} 200 200)" fill="${fg}"/><rect x="188" y="270" width="24" height="90" rx="12" transform="rotate(${a} 200 200)" fill="${hi}"/>`).join("")}`,
+    `<path d="M 40 200 Q 120 120 200 200 T 360 200" fill="none" stroke="${fg}" stroke-width="10" stroke-linecap="round"/><path d="M 40 250 Q 120 170 200 250 T 360 250" fill="none" stroke="${hi}" stroke-width="6" stroke-linecap="round"/>`,
+    `${[0, 1, 2, 3, 4, 5, 6, 7].map(j => `<circle cx="${200 + 150 * Math.cos(j * Math.PI / 4)}" cy="${200 + 150 * Math.sin(j * Math.PI / 4)}" r="${10 + (j % 3) * 6}" fill="${j % 2 ? fg : hi}"/>`).join("")}`,
   ];
   return shapes[i % shapes.length];
 }
 
-function coverSVG(beat, i) {
+// Label: title + credit in one consistent layout, hole kept clear.
+function labelSVG(beat, i) {
   const pal = PALETTES[i % PALETTES.length];
-  return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${beat.title} cover art">
+  const t = beat.title;
+  const size = Math.min(40, 300 / Math.max(1, t.length) * 2.4);
+  return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t} record label">
     <rect width="400" height="400" fill="${pal[0]}"/>
-    ${motif(i, pal)}
-    <text x="28" y="376" font-family="Fraunces, Georgia, serif" font-size="22" fill="${pal[2]}">${beat.title}</text>
-    <text x="372" y="376" text-anchor="end" font-family="Inter, sans-serif" font-size="11" fill="${pal[2]}" opacity="0.7">imnotbink</text>
+    <g opacity="0.28">${motif(i, pal)}</g>
+    <circle cx="200" cy="200" r="192" fill="none" stroke="${pal[2]}" stroke-width="2" opacity="0.5"/>
+    <text x="200" y="130" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="${size}" fill="${pal[2]}">${t}</text>
+    <text x="200" y="292" text-anchor="middle" font-family="Inter, sans-serif" font-size="17" letter-spacing="1" fill="${pal[2]}" opacity="0.85">${credit(beat)}</text>
+    <text x="200" y="330" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" letter-spacing="3" fill="${pal[2]}" opacity="0.5">IMNOTBINK · 2026</text>
   </svg>`;
 }
 
-// ---------- shelf ----------
+// ---------- turntable + crate ----------
 
-const shelf = document.getElementById("beatShelf");
+const vinyl = document.getElementById("vinyl");
+const vinylLabel = document.getElementById("vinylLabel");
+const nowTitle = document.getElementById("nowTitle");
+const nowCredit = document.getElementById("nowCredit");
+const list = document.getElementById("tracklist");
 const audio = new Audio();
 const bar = document.getElementById("playerBar");
 const pbToggle = document.getElementById("pbToggle");
@@ -93,26 +81,26 @@ const pbTime = document.getElementById("pbTime");
 let current = -1;
 
 BEATS.forEach((beat, i) => {
-  const el = document.createElement("article");
-  el.className = "beat";
-  el.innerHTML = `
-    <div class="cover" role="button" tabindex="0" aria-label="Play ${beat.title}">
-      ${coverSVG(beat, i)}
-      <div class="play-hint">▶</div>
+  const li = document.createElement("li");
+  li.innerHTML = `
+    <div class="trk-main">
+      <div class="trk-title">${beat.title}</div>
+      <div class="trk-sub">${credit(beat)}${beat.meta ? " · " + beat.meta : ""}</div>
     </div>
-    <div class="beat-title">${beat.title}</div>
-    <div class="beat-meta">${beat.meta}</div>
-    <div class="beat-row">
-      <span class="beat-price">$${beat.price}</span>
-      <a class="beat-buy" href="mailto:${EMAIL}?subject=${encodeURIComponent(`Beat purchase: "${beat.title}" ($${beat.price} lease)`)}&body=${encodeURIComponent(`Hey Tyler, I want to buy the "${beat.title}" beat.`)}">Buy</a>
-    </div>`;
-  const cover = el.querySelector(".cover");
-  cover.addEventListener("click", () => toggle(i));
-  cover.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(i); } });
-  shelf.appendChild(el);
+    <span class="trk-price">$${PRICE}</span>
+    <a class="beat-buy" href="mailto:${EMAIL}?subject=${encodeURIComponent(`Beat purchase: "${beat.title}" ($${PRICE} lease)`)}&body=${encodeURIComponent(`Hey Tyler, I want to buy the "${beat.title}" beat (${credit(beat)}).`)}">Buy</a>`;
+  li.addEventListener("click", (e) => { if (!e.target.closest(".beat-buy")) toggle(i); });
+  list.appendChild(li);
 });
 
-const cards = [...shelf.children];
+const rows = [...list.children];
+
+// show the first record on the platter before anything plays
+loadLabel(0);
+
+function loadLabel(i) {
+  vinylLabel.innerHTML = labelSVG(BEATS[i], i);
+}
 
 function toggle(i) {
   if (current === i && !audio.paused) {
@@ -121,6 +109,9 @@ function toggle(i) {
     if (current !== i) {
       current = i;
       audio.src = BEATS[i].file;
+      loadLabel(i);
+      nowTitle.textContent = BEATS[i].title;
+      nowCredit.textContent = credit(BEATS[i]) + (BEATS[i].meta ? " · " + BEATS[i].meta : "");
       pbTitle.textContent = BEATS[i].title;
       bar.hidden = false;
     }
@@ -131,10 +122,8 @@ function toggle(i) {
 
 function render() {
   const playing = !audio.paused;
-  cards.forEach((c, i) => {
-    c.classList.toggle("playing", i === current && playing);
-    c.querySelector(".play-hint").textContent = i === current && playing ? "❚❚" : "▶";
-  });
+  vinyl.classList.toggle("spinning", playing);
+  rows.forEach((r, i) => r.classList.toggle("playing", i === current));
   pbToggle.textContent = playing ? "❚❚" : "▶";
 }
 
@@ -156,7 +145,7 @@ audio.addEventListener("timeupdate", () => {
 audio.addEventListener("play", render);
 audio.addEventListener("pause", render);
 audio.addEventListener("ended", () => {
-  // auto-advance to the next beat, radio style
+  // auto-advance through the crate, radio style
   toggle((current + 1) % BEATS.length);
 });
 
