@@ -14,11 +14,11 @@ const BEATS = [
   { file: "beats/coupe.mp3",            title: "coupe",            meta: "",                 prod: ["imnotbink"] },
   { file: "beats/digital-runner.mp3",   title: "digital runner",   meta: "",                 prod: ["imnotbink"] },
   { file: "beats/grail.mp3",            title: "grail",            meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/tethered.mp3",         title: "tethered",         meta: "148 BPM · A maj",  prod: ["imnotbink"] },
-  { file: "beats/in-elsewhere.mp3",     title: "in elsewhere",     meta: "152 BPM",          prod: ["imnotbink", "wa"] },
+  { file: "beats/tethered.mp3",         title: "tethered",         meta: "148 BPM · A maj",  prod: ["imnotbink", "rioleyva", "vendr"] },
+  { file: "beats/in-elsewhere.mp3",     title: "in elsewhere",     meta: "152 BPM",          prod: ["imnotbink", "praizewa"] },
   { file: "beats/natural.mp3",          title: "natural",          meta: "",                 prod: ["imnotbink"] },
   { file: "beats/pretty.mp3",           title: "pretty",           meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/run-run.mp3",          title: "run run",          meta: "140 BPM",          prod: ["imnotbink", "wa"] },
+  { file: "beats/run-run.mp3",          title: "run run",          meta: "140 BPM",          prod: ["imnotbink", "praizewa"] },
   { file: "beats/silver.mp3",           title: "silver",           meta: "147 BPM · A maj",  prod: ["imnotbink"] },
   { file: "beats/stampede.mp3",         title: "stampede",         meta: "",                 prod: ["imnotbink"] },
   { file: "beats/timetraveler.m4a",     title: "timetraveler",     meta: "140 BPM · A maj",  prod: ["imnotbink"] },
@@ -57,11 +57,20 @@ function sleeveSVG(beat, i) {
   const t = beat.title;
   const size = Math.min(38, 330 / Math.max(1, t.length) * 2.2);
   return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t} sleeve">
+    <defs>
+      <filter id="grain${i}"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="${i * 3 + 1}" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+      <radialGradient id="vig${i}" cx="50%" cy="42%" r="75%">
+        <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000" stop-opacity="0.32"/>
+      </radialGradient>
+    </defs>
     <rect width="400" height="400" fill="${pal[0]}"/>
     <g opacity="0.9" transform="translate(0,-30)">${motif(i, pal)}</g>
     <text x="26" y="330" font-family="Fraunces, Georgia, serif" font-size="${size}" fill="${pal[2]}">${t}</text>
     <text x="26" y="358" font-family="Inter, sans-serif" font-size="13" letter-spacing="1" fill="${pal[2]}" opacity="0.75">${credit(beat)}</text>
     ${credit(beat).length <= 26 ? `<text x="374" y="358" text-anchor="end" font-family="Inter, sans-serif" font-size="10" letter-spacing="2" fill="${pal[2]}" opacity="0.45">IMNOTBINK · 2026</text>` : ""}
+    <rect width="400" height="400" filter="url(#grain${i})" opacity="0.055"/>
+    <rect width="400" height="400" fill="url(#vig${i})"/>
   </svg>`;
 }
 
@@ -106,8 +115,18 @@ BEATS.forEach((beat, i) => {
   el.setAttribute("tabindex", "0");
   el.setAttribute("aria-label", `Play ${beat.title}`);
   const pal = PALETTES[i % PALETTES.length];
-  el.innerHTML = `${sleeveSVG(beat, i)}
-    <div class="spine" style="background:${pal[0]};color:${pal[2]}">${beat.title}</div>
+  // hand-filed jitter, deterministic per card: lean, z-tilt, settle height
+  el.style.setProperty("--lean", -63 + (((i * 4) % 9) - 4) + "deg");
+  el.style.setProperty("--tilt", ((((i * 53) % 5) - 2) * 0.7).toFixed(1) + "deg");
+  el.style.setProperty("--lift", (((i * 29) % 7) - 3) + "px");
+  el.innerHTML = `
+    <div class="box">
+      <div class="face front">${sleeveSVG(beat, i)}<div class="gloss"></div></div>
+      <div class="face back" style="background:color-mix(in srgb, ${pal[0]} 60%, #0a0a0a)"></div>
+      <div class="face spine" style="background:${pal[0]};color:${pal[2]}">${beat.title}</div>
+      <div class="face top"></div>
+      <div class="face bottom"></div>
+    </div>
     <span class="sleeve-caption">${beat.title} · $${PRICE}</span>`;
   el.addEventListener("click", () => toggle(i));
   el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(i); } });

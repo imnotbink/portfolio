@@ -227,63 +227,91 @@ img { max-width: 100%; display: block; }
      carries its own perspective() so every card leans identically. */
 }
 .sleeve {
-  --lean: -64deg;
+  --lean: -63deg;      /* per-card jitter set inline from JS */
+  --tilt: 0deg;
   --lift: 0px;
+  --lean-scale: 1;
   position: relative;
   flex: none;
   width: clamp(220px, 25vw, 310px);
   aspect-ratio: 1;
   margin-right: calc(clamp(220px, 25vw, 310px) * -0.56);
   cursor: pointer;
-  transform: perspective(1000px) rotateY(var(--lean)) translateY(var(--lift));
+  transform: perspective(1000px)
+             rotateY(calc(var(--lean) * var(--lean-scale)))
+             rotateZ(var(--tilt))
+             translateY(var(--lift));
   transform-style: preserve-3d;
   transform-origin: center center;
   /* one springy arc: reads as lift-then-turn, reverses cleanly */
   transition: transform 0.55s cubic-bezier(0.3, 1.2, 0.3, 1);
   z-index: 1;
   filter: drop-shadow(-20px 28px 20px rgba(0, 0, 0, 0.7));
+  /* glossy floor */
+  -webkit-box-reflect: below 8px linear-gradient(transparent 78%, rgba(255, 255, 255, 0.10));
 }
-/* filed unevenly, like a real crate */
-.sleeve:nth-child(3n)   { --lean: -58deg; --lift: -8px; }
-.sleeve:nth-child(3n+1) { --lean: -67deg; --lift: 5px; }
 .sleeve:last-child { margin-right: 0; }
-/* hover / playing: lift out of the row and swing flat to face the user */
+/* hover / playing: the box lifts out of the row and swings flat to face the user */
 .sleeve:hover, .sleeve.playing {
-  transform: perspective(1000px) rotateY(0deg) translateY(-44px) translateZ(60px);
+  transform: perspective(1000px) rotateY(0deg) rotateZ(0deg) translateY(-46px) translateZ(60px);
   z-index: 10;
 }
-.sleeve svg { width: 100%; height: 100%; display: block; border-radius: 2px; }
-/* real spine, perpendicular to the cover — carries the title edge-on */
-.spine {
-  position: absolute;
+
+/* ---- the sleeve is a real box: front/back/spine/top/bottom faces ---- */
+.box {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+}
+.face { position: absolute; backface-visibility: hidden; }
+.face.front {
+  inset: 0;
+  transform: translateZ(16px);
+  overflow: hidden;
+  border-radius: 2px;
+}
+.face.front svg { width: 100%; height: 100%; display: block; }
+.gloss {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg,
+    transparent 30%, rgba(255, 255, 255, 0.13) 45%,
+    rgba(255, 255, 255, 0.03) 55%, transparent 70%);
+}
+.face.back {
+  inset: 0;
+  transform: rotateY(180deg);
+  border-radius: 2px;
+}
+.face.spine {
   right: 0; top: 0; bottom: 0;
-  width: 26px;
-  /* perpendicular to the cover on its right edge — the side that faces the
-     viewer while the card leans; goes edge-on as the card turns flat */
+  width: 16px;
   transform: rotateY(90deg);
   transform-origin: right center;
-  backface-visibility: hidden;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding-top: 14px;
   writing-mode: vertical-rl;
   font-family: "Fraunces", Georgia, serif;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   letter-spacing: 0.06em;
   white-space: nowrap;
   overflow: hidden;
-  box-shadow: inset -3px 0 6px rgba(0, 0, 0, 0.45);
+  box-shadow: inset -4px 0 7px rgba(0, 0, 0, 0.5), inset 1px 0 0 rgba(255, 255, 255, 0.18);
 }
-/* top edge so the box reads as an object */
-.sleeve::after {
-  content: "";
-  position: absolute;
+.face.top {
   left: 0; right: 0; top: 0;
-  height: 26px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
-  transform: rotateX(-90deg);
+  height: 16px;
+  transform: rotateX(90deg);
   transform-origin: center top;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
+}
+.face.bottom {
+  left: 0; right: 0; bottom: 0;
+  height: 16px;
+  transform: rotateX(-90deg);
+  transform-origin: center bottom;
+  background: rgba(0, 0, 0, 0.55);
 }
 .sleeve-caption {
   position: absolute;
@@ -361,10 +389,9 @@ footer {
 
 @media (max-width: 700px) {
   .nav-links a:not(:first-child) { display: none; }
-  /* gentler fan on small screens so covers stay readable */
-  .sleeve { --lean: -48deg; margin-right: calc(clamp(220px, 25vw, 310px) * -0.42); }
-  .sleeve:nth-child(3n)   { --lean: -44deg; }
-  .sleeve:nth-child(3n+1) { --lean: -50deg; }
+  /* gentler fan on small screens so covers stay readable
+     (JS sets --lean inline, so scale it instead of overriding) */
+  .sleeve { --lean-scale: 0.74; margin-right: calc(clamp(220px, 25vw, 310px) * -0.42); }
   .turntable { flex-direction: column; text-align: center; gap: 20px; }
   .deck-side { max-width: none; }
   .now-buy, .deck-controls { justify-content: center; }
