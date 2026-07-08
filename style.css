@@ -222,53 +222,68 @@ img { max-width: 100%; display: block; }
   align-items: flex-end;
   width: max-content;
   margin: 0 auto;
-  perspective: 1100px;
-  perspective-origin: 50% 35%;
+  /* NOTE: no shared perspective — with a row this wide, cards far from the
+     vanishing point flip past 90° and show mirrored backfaces. Each sleeve
+     carries its own perspective() so every card leans identically. */
 }
 .sleeve {
-  --lean: -42deg;
+  --lean: -64deg;
   --lift: 0px;
   position: relative;
   flex: none;
-  width: clamp(210px, 24vw, 300px);
+  width: clamp(220px, 25vw, 310px);
   aspect-ratio: 1;
-  margin-right: calc(clamp(210px, 24vw, 300px) * -0.44);
+  margin-right: calc(clamp(220px, 25vw, 310px) * -0.56);
   cursor: pointer;
-  transform: rotateY(var(--lean)) translateY(var(--lift));
+  transform: perspective(1000px) rotateY(var(--lean)) translateY(var(--lift));
   transform-style: preserve-3d;
-  transform-origin: left center;
-  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: center center;
+  /* one springy arc: reads as lift-then-turn, reverses cleanly */
+  transition: transform 0.55s cubic-bezier(0.3, 1.2, 0.3, 1);
   z-index: 1;
-  filter: drop-shadow(-24px 30px 22px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(-20px 28px 20px rgba(0, 0, 0, 0.7));
 }
-/* stagger like books pulled half out of a shelf */
-.sleeve:nth-child(3n)   { --lean: -36deg; --lift: -10px; }
-.sleeve:nth-child(3n+1) { --lean: -45deg; --lift: 4px; }
+/* filed unevenly, like a real crate */
+.sleeve:nth-child(3n)   { --lean: -58deg; --lift: -8px; }
+.sleeve:nth-child(3n+1) { --lean: -67deg; --lift: 5px; }
 .sleeve:last-child { margin-right: 0; }
+/* hover / playing: lift out of the row and swing flat to face the user */
 .sleeve:hover, .sleeve.playing {
-  transform: rotateY(-6deg) translateY(-30px) translateZ(90px);
+  transform: perspective(1000px) rotateY(0deg) translateY(-44px) translateZ(60px);
   z-index: 10;
 }
 .sleeve svg { width: 100%; height: 100%; display: block; border-radius: 2px; }
-/* cardboard depth: spine edge... */
-.sleeve::before {
-  content: "";
+/* real spine, perpendicular to the cover — carries the title edge-on */
+.spine {
   position: absolute;
-  left: -13px; top: 1px; bottom: 1px;
-  width: 13px;
-  background: linear-gradient(rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.45));
-  transform: rotateY(-72deg);
+  right: 0; top: 0; bottom: 0;
+  width: 26px;
+  /* perpendicular to the cover on its right edge — the side that faces the
+     viewer while the card leans; goes edge-on as the card turns flat */
+  transform: rotateY(90deg);
   transform-origin: right center;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14px;
+  writing-mode: vertical-rl;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  box-shadow: inset -3px 0 6px rgba(0, 0, 0, 0.45);
 }
-/* ...and a top edge so the box reads as an object */
+/* top edge so the box reads as an object */
 .sleeve::after {
   content: "";
   position: absolute;
-  left: 0; right: 12px; top: -11px;
-  height: 11px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
-  transform: rotateX(72deg);
-  transform-origin: center bottom;
+  left: 0; right: 0; top: 0;
+  height: 26px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+  transform: rotateX(-90deg);
+  transform-origin: center top;
 }
 .sleeve-caption {
   position: absolute;
@@ -347,10 +362,9 @@ footer {
 @media (max-width: 700px) {
   .nav-links a:not(:first-child) { display: none; }
   /* gentler fan on small screens so covers stay readable */
-  .sleeve { --lean: -26deg; margin-right: calc(clamp(210px, 24vw, 300px) * -0.3); }
-  .sleeve:nth-child(3n)   { --lean: -22deg; }
-  .sleeve:nth-child(3n+1) { --lean: -28deg; }
-  .rack { perspective: 900px; }
+  .sleeve { --lean: -48deg; margin-right: calc(clamp(220px, 25vw, 310px) * -0.42); }
+  .sleeve:nth-child(3n)   { --lean: -44deg; }
+  .sleeve:nth-child(3n+1) { --lean: -50deg; }
   .turntable { flex-direction: column; text-align: center; gap: 20px; }
   .deck-side { max-width: none; }
   .now-buy, .deck-controls { justify-content: center; }

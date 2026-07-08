@@ -61,7 +61,7 @@ function sleeveSVG(beat, i) {
     <g opacity="0.9" transform="translate(0,-30)">${motif(i, pal)}</g>
     <text x="26" y="330" font-family="Fraunces, Georgia, serif" font-size="${size}" fill="${pal[2]}">${t}</text>
     <text x="26" y="358" font-family="Inter, sans-serif" font-size="13" letter-spacing="1" fill="${pal[2]}" opacity="0.75">${credit(beat)}</text>
-    <text x="374" y="358" text-anchor="end" font-family="Inter, sans-serif" font-size="10" letter-spacing="2" fill="${pal[2]}" opacity="0.45">IMNOTBINK · 2026</text>
+    ${credit(beat).length <= 26 ? `<text x="374" y="358" text-anchor="end" font-family="Inter, sans-serif" font-size="10" letter-spacing="2" fill="${pal[2]}" opacity="0.45">IMNOTBINK · 2026</text>` : ""}
   </svg>`;
 }
 
@@ -105,7 +105,10 @@ BEATS.forEach((beat, i) => {
   el.setAttribute("role", "button");
   el.setAttribute("tabindex", "0");
   el.setAttribute("aria-label", `Play ${beat.title}`);
-  el.innerHTML = `${sleeveSVG(beat, i)}<span class="sleeve-caption">${beat.title} · $${PRICE}</span>`;
+  const pal = PALETTES[i % PALETTES.length];
+  el.innerHTML = `${sleeveSVG(beat, i)}
+    <div class="spine" style="background:${pal[0]};color:${pal[2]}">${beat.title}</div>
+    <span class="sleeve-caption">${beat.title} · $${PRICE}</span>`;
   el.addEventListener("click", () => toggle(i));
   el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(i); } });
   rack.appendChild(el);
