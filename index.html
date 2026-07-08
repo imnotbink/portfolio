@@ -25,6 +25,9 @@
   <section id="beats" class="section beats-stage" >
     <div class="stage-bg" aria-hidden="true"></div>
     <h1 class="wordmark" id="top">imnotbink</h1>
+    <div class="rack-wrap">
+      <div class="rack" id="rack"></div>
+    </div>
     <div class="turntable">
       <div class="vinyl" id="vinyl">
         <div class="platter" id="platter">
@@ -32,25 +35,24 @@
         </div>
         <div class="vinyl-sheen" aria-hidden="true"></div>
       </div>
-      <div class="deck-controls">
-        <button class="deck-btn" id="speedDown" aria-label="Slow down">−</button>
-        <span class="deck-speed" id="speedLabel">1.00×</span>
-        <button class="deck-btn" id="speedUp" aria-label="Speed up">+</button>
-        <button class="deck-btn deck-shuffle" id="shuffleBtn" aria-pressed="false">shuffle</button>
-      </div>
-      <div class="now">
-        <div class="now-title" id="nowTitle">drop the needle</div>
-        <div class="now-credit" id="nowCredit">click a sleeve below · click the record to pause · drag it to scratch</div>
-        <div class="now-buy" id="nowBuy" hidden>
-          <span id="nowPrice"></span>
-          <a class="beat-buy" id="nowBuyLink" href="#">Buy this beat</a>
+      <div class="deck-side">
+        <div class="now">
+          <div class="now-title" id="nowTitle">drop the needle</div>
+          <div class="now-credit" id="nowCredit">click a sleeve · click the record to pause · drag to scratch</div>
+          <div class="now-buy" id="nowBuy" hidden>
+            <span id="nowPrice"></span>
+            <a class="beat-buy" id="nowBuyLink" href="#">Buy this beat</a>
+          </div>
+        </div>
+        <div class="deck-controls">
+          <button class="deck-btn" id="speedDown" aria-label="Slow down">−</button>
+          <span class="deck-speed" id="speedLabel">1.00×</span>
+          <button class="deck-btn" id="speedUp" aria-label="Speed up">+</button>
+          <button class="deck-btn deck-shuffle" id="shuffleBtn" aria-pressed="false">shuffle</button>
         </div>
       </div>
     </div>
-    <div class="rack-wrap">
-      <div class="rack" id="rack"></div>
-    </div>
-    <p class="note">Click a sleeve to spin it · <b>Buy</b> opens an email with the beat pre-filled · $30 lease, exclusives &amp; stems negotiable</p>
+    <p class="note"><b>Buy</b> opens an email with the beat pre-filled · $30 lease, exclusives &amp; stems negotiable</p>
   </section>
 
   <section id="photo" class="photo-block">

@@ -45,8 +45,8 @@ img { max-width: 100%; display: block; }
   letter-spacing: -0.03em;
   position: relative;
   z-index: 1;
-  /* the record rides up over the bottom half of the type */
-  margin-bottom: -0.52em;
+  /* the rack rides up over the bottom of the type, Foliom-style */
+  margin-bottom: -0.34em;
   pointer-events: none;
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45);
 }
@@ -87,23 +87,29 @@ img { max-width: 100%; display: block; }
 }
 .beats-stage > :not(.stage-bg) { position: relative; z-index: 1; }
 
+/* compact now-playing deck under the rack */
 .turntable {
-  text-align: center;
-  z-index: 2; /* deck rides over the wordmark */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4vw, 48px);
+  margin-top: clamp(30px, 5vh, 55px);
+  text-align: left;
 }
 .vinyl {
   --tint: #6b5ce8;
   position: relative;
-  width: min(400px, 78vw);
+  flex: none;
+  width: min(170px, 42vw);
   aspect-ratio: 1;
-  margin: 0 auto;
   border-radius: 50%;
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
   cursor: grab;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
 }
+.deck-side { max-width: 340px; }
 .vinyl.scratching { cursor: grabbing; }
 
 /* the platter is what rotates — a colored pressing tinted per beat */
@@ -138,8 +144,8 @@ img { max-width: 100%; display: block; }
 }
 
 .deck-controls {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  margin-top: 30px;
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 18px;
 }
 .deck-btn {
   border: 1px solid var(--line);
@@ -181,12 +187,11 @@ img { max-width: 100%; display: block; }
   box-shadow: inset 0 0 4px #000;
 }
 
-.now { margin-top: 26px; }
-.now-title { font-family: "Fraunces", Georgia, serif; font-size: 1.5rem; }
-.now-credit { color: var(--muted); font-size: 0.82rem; margin-top: 4px; }
+.now-title { font-family: "Fraunces", Georgia, serif; font-size: 1.4rem; }
+.now-credit { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
 .now-buy {
-  display: flex; align-items: center; justify-content: center; gap: 14px;
-  margin-top: 14px;
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 12px;
 }
 .now-buy[hidden] { display: none; }
 #nowPrice { color: var(--muted); font-size: 0.9rem; }
@@ -199,12 +204,13 @@ img { max-width: 100%; display: block; }
 }
 .beat-buy:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-/* ---------- fanned sleeve rack (Foliom-style) ---------- */
+/* ---------- fanned sleeve rack — THE centerpiece (Foliom-style) ---------- */
 .rack-wrap {
-  margin-top: clamp(40px, 7vh, 80px);
+  position: relative;
+  z-index: 2; /* rides over the wordmark */
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 40px 6vw 26px;
+  padding: 46px 6vw 40px;
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
   /* fade the row edges */
@@ -216,39 +222,53 @@ img { max-width: 100%; display: block; }
   align-items: flex-end;
   width: max-content;
   margin: 0 auto;
-  perspective: 1400px;
-  perspective-origin: 50% 40%;
+  perspective: 1100px;
+  perspective-origin: 50% 35%;
 }
 .sleeve {
+  --lean: -42deg;
+  --lift: 0px;
   position: relative;
   flex: none;
-  width: clamp(150px, 17vw, 210px);
+  width: clamp(210px, 24vw, 300px);
   aspect-ratio: 1;
-  margin-right: calc(clamp(150px, 17vw, 210px) * -0.42);
+  margin-right: calc(clamp(210px, 24vw, 300px) * -0.44);
   cursor: pointer;
-  transform: rotateY(-42deg);
+  transform: rotateY(var(--lean)) translateY(var(--lift));
   transform-style: preserve-3d;
   transform-origin: left center;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), z-index 0s 0.1s;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
   z-index: 1;
-  filter: drop-shadow(-18px 22px 18px rgba(0, 0, 0, 0.65));
+  filter: drop-shadow(-24px 30px 22px rgba(0, 0, 0, 0.7));
 }
+/* stagger like books pulled half out of a shelf */
+.sleeve:nth-child(3n)   { --lean: -36deg; --lift: -10px; }
+.sleeve:nth-child(3n+1) { --lean: -45deg; --lift: 4px; }
 .sleeve:last-child { margin-right: 0; }
 .sleeve:hover, .sleeve.playing {
-  transform: rotateY(-12deg) translateY(-22px) translateZ(60px);
+  transform: rotateY(-6deg) translateY(-30px) translateZ(90px);
   z-index: 10;
-  transition-delay: 0s;
 }
 .sleeve svg { width: 100%; height: 100%; display: block; border-radius: 2px; }
-/* sleeve edge — fake cardboard depth */
+/* cardboard depth: spine edge... */
 .sleeve::before {
   content: "";
   position: absolute;
-  left: -7px; top: 1px; bottom: 1px;
-  width: 7px;
-  background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.4));
-  transform: rotateY(-70deg);
+  left: -13px; top: 1px; bottom: 1px;
+  width: 13px;
+  background: linear-gradient(rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.45));
+  transform: rotateY(-72deg);
   transform-origin: right center;
+}
+/* ...and a top edge so the box reads as an object */
+.sleeve::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 12px; top: -11px;
+  height: 11px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+  transform: rotateX(72deg);
+  transform-origin: center bottom;
 }
 .sleeve-caption {
   position: absolute;
@@ -324,6 +344,14 @@ footer {
 .pb-progress { height: 100%; width: 0; background: var(--text); border-radius: 999px; }
 #pbTime { color: var(--muted); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
 
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   .nav-links a:not(:first-child) { display: none; }
+  /* gentler fan on small screens so covers stay readable */
+  .sleeve { --lean: -26deg; margin-right: calc(clamp(210px, 24vw, 300px) * -0.3); }
+  .sleeve:nth-child(3n)   { --lean: -22deg; }
+  .sleeve:nth-child(3n+1) { --lean: -28deg; }
+  .rack { perspective: 900px; }
+  .turntable { flex-direction: column; text-align: center; gap: 20px; }
+  .deck-side { max-width: none; }
+  .now-buy, .deck-controls { justify-content: center; }
 }
