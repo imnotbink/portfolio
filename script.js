@@ -83,6 +83,7 @@ function labelSVG(beat, i) {
 // ---------- turntable + crate ----------
 
 const vinyl = document.getElementById("vinyl");
+const platter = document.getElementById("platter");
 const vinylLabel = document.getElementById("vinylLabel");
 const nowTitle = document.getElementById("nowTitle");
 const nowCredit = document.getElementById("nowCredit");
@@ -129,7 +130,7 @@ if ("webkitPreservesPitch" in audio) audio.webkitPreservesPitch = false;
 // Normal spin is a CSS keyframe animation (compositor-friendly); JS only
 // drives the platter while scratching.
 function currentVisualAngle() {
-  const m = getComputedStyle(vinyl).transform;
+  const m = getComputedStyle(platter).transform;
   if (!m || m === "none") return 0;
   const [a, b] = m.slice(7, -1).split(",").map(Number);
   return (Math.atan2(b, a) * 180) / Math.PI;
@@ -148,7 +149,7 @@ vinyl.addEventListener("pointerdown", (e) => {
   scratching = true;
   angle = currentVisualAngle();
   vinyl.classList.add("scratching");
-  vinyl.style.transform = `rotate(${angle}deg)`;
+  platter.style.transform = `rotate(${angle}deg)`;
   if (grab.wasPlaying) audio.pause();
 });
 vinyl.addEventListener("pointermove", (e) => {
@@ -159,7 +160,7 @@ vinyl.addEventListener("pointermove", (e) => {
   grab.a = ptrAngle(e);
   grab.moved += Math.abs(d);
   angle += d;
-  vinyl.style.transform = `rotate(${angle}deg)`;
+  platter.style.transform = `rotate(${angle}deg)`;
   // spinning the record scrubs the audio: one revolution = one platter-second
   if (current >= 0) {
     const dur = duration();
@@ -173,7 +174,7 @@ function release(e) {
   const quickTap = grab.moved < 8 && performance.now() - grab.t < 350;
   scratching = false;
   vinyl.classList.remove("scratching");
-  vinyl.style.transform = "";
+  platter.style.transform = "";
   if (quickTap) {
     // click = play/pause (audio was paused on pointerdown, so a tap while
     // playing just leaves it paused; a tap while paused starts it)
@@ -193,7 +194,7 @@ vinyl.addEventListener("pointercancel", release);
 function setRate(r) {
   rate = Math.min(2, Math.max(0.5, Math.round(r * 4) / 4));
   audio.playbackRate = rate;
-  vinyl.style.setProperty("--spin-dur", REV_S / rate + "s");
+  platter.style.setProperty("--spin-dur", REV_S / rate + "s");
   speedLabel.textContent = rate.toFixed(2) + "×";
 }
 document.getElementById("speedDown").addEventListener("click", () => setRate(rate - 0.25));
@@ -216,6 +217,8 @@ loadLabel(0);
 
 function loadLabel(i) {
   vinylLabel.innerHTML = labelSVG(BEATS[i], i);
+  // tint the pressing to match the beat's palette accent
+  vinyl.style.setProperty("--tint", PALETTES[i % PALETTES.length][1]);
 }
 
 function toggle(i) {
@@ -242,7 +245,7 @@ function toggle(i) {
 
 function render() {
   const playing = !audio.paused;
-  vinyl.classList.toggle("spinning", playing && !scratching);
+  platter.classList.toggle("spinning", playing && !scratching);
   rows.forEach((r, i) => r.classList.toggle("playing", i === current));
   pbToggle.textContent = playing ? "❚❚" : "▶";
 }
@@ -268,6 +271,23 @@ audio.addEventListener("ended", () => {
   // auto-advance: shuffle picks anything, otherwise next in the rack
   toggle(shuffle ? randomIndex() : (current + 1) % BEATS.length);
 });
+
+// ---------- parallax photo behind the deck ----------
+
+// CSS scroll-driven animation handles it natively where supported
+if (!CSS.supports("animation-timeline: view()")) {
+  const stage = document.querySelector(".beats-stage");
+  const stageBg = document.querySelector(".stage-bg");
+  const parallax = () => {
+    const r = stage.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    const p = (r.top + r.height / 2 - innerHeight / 2) / (innerHeight + r.height);
+    stageBg.style.transform = `translateY(${(-p * 110).toFixed(1)}px)`;
+  };
+  addEventListener("scroll", parallax, { passive: true });
+  addEventListener("resize", parallax);
+  parallax();
+}
 
 pbToggle.addEventListener("click", () => current >= 0 && toggle(current));
 document.querySelector(".pb-track").addEventListener("click", (e) => {

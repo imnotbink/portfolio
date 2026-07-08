@@ -53,38 +53,84 @@ img { max-width: 100%; display: block; }
 
 .beats-stage {
   position: relative;
-  background:
-    linear-gradient(rgba(13, 12, 10, 0.55), rgba(13, 12, 10, 0.68) 55%, rgba(13, 12, 10, 0.92)),
-    url("img/container.jpg") center 30% / cover no-repeat;
+  overflow: clip; /* clips like hidden but doesn't become a scroll container,
+                     which would break the view() parallax timeline */
   border-block: 1px solid var(--line);
 }
+/* parallax photo layer — oversized so it can drift as you scroll */
+.stage-bg {
+  position: absolute;
+  inset: -14% 0;
+  background: url("img/container.jpg") center 30% / cover no-repeat;
+  will-change: transform;
+  z-index: 0;
+}
+/* scroll-driven parallax (compositor); JS fallback covers older browsers */
+@supports (animation-timeline: view()) {
+  .stage-bg {
+    animation: bg-drift linear both;
+    animation-timeline: view();
+  }
+  @keyframes bg-drift {
+    from { transform: translateY(-70px); }
+    to { transform: translateY(70px); }
+  }
+}
+.stage-bg::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(rgba(13, 12, 10, 0.55), rgba(13, 12, 10, 0.65) 55%, rgba(13, 12, 10, 0.92));
+}
+.beats-stage > :not(.stage-bg) { position: relative; z-index: 1; }
 
 .turntable {
   text-align: center;
 }
 .vinyl {
+  --tint: #6b5ce8;
   position: relative;
   width: min(400px, 78vw);
   aspect-ratio: 1;
   margin: 0 auto;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.14), transparent 42%),
-    radial-gradient(circle at 70% 78%, rgba(255, 255, 255, 0.05), transparent 40%),
-    repeating-radial-gradient(circle, #101010 0px, #101010 2px, #1b1b1b 3px, #101010 4px),
-    #101010;
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.75), inset 0 0 2px rgba(255, 255, 255, 0.25);
-}
-.vinyl {
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.75);
   cursor: grab;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+}
+.vinyl.scratching { cursor: grabbing; }
+
+/* the platter is what rotates — a colored pressing tinted per beat */
+.platter {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle,
+      rgba(0, 0, 0, 0.5) 0px, rgba(0, 0, 0, 0.5) 2px,
+      rgba(255, 255, 255, 0.06) 3px, rgba(0, 0, 0, 0.45) 4px),
+    radial-gradient(circle,
+      color-mix(in srgb, var(--tint) 60%, #0b0b0b) 0%,
+      color-mix(in srgb, var(--tint) 38%, #0a0a0a) 55%,
+      color-mix(in srgb, var(--tint) 16%, #060606) 100%);
   will-change: transform;
 }
-.vinyl.spinning { animation: spin var(--spin-dur, 1.8s) linear infinite; }
+.platter.spinning { animation: spin var(--spin-dur, 1.8s) linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.vinyl.scratching { cursor: grabbing; animation: none; }
+.vinyl.scratching .platter { animation: none; }
+
+/* static light — reflections don't rotate with the record */
+.vinyl-sheen {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    conic-gradient(from 205deg,
+      transparent 0deg, rgba(255, 255, 255, 0.28) 12deg, rgba(255, 255, 255, 0.05) 30deg, transparent 55deg,
+      transparent 165deg, rgba(255, 255, 255, 0.14) 190deg, transparent 225deg),
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.12), transparent 45%);
+  box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.3), inset 0 0 40px rgba(0, 0, 0, 0.35);
+}
 
 .deck-controls {
   display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -137,6 +183,7 @@ img { max-width: 100%; display: block; }
   display: flex; align-items: center; justify-content: center; gap: 14px;
   margin-top: 14px;
 }
+.now-buy[hidden] { display: none; }
 #nowPrice { color: var(--muted); font-size: 0.9rem; }
 .beat-buy {
   border: 1px solid var(--line);
