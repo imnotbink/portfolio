@@ -24,10 +24,6 @@
 
   <header class="hero" id="top">
     <h1>imnotbink</h1>
-    <p class="hero-sub">Tyler Schrimper — producer &amp; digital creator. 7,000 beats and counting.</p>
-    <div class="tags">
-      <span>melodic</span><span>trap</span><span>ambient</span><span>club</span><span>experimental</span>
-    </div>
   </header>
 
   <section id="beats" class="section beats-stage">
@@ -35,9 +31,15 @@
       <div class="vinyl" id="vinyl">
         <div class="vinyl-label" id="vinylLabel"></div>
       </div>
+      <div class="deck-controls">
+        <button class="deck-btn" id="speedDown" aria-label="Slow down">−</button>
+        <span class="deck-speed" id="speedLabel">1.00×</span>
+        <button class="deck-btn" id="speedUp" aria-label="Speed up">+</button>
+        <button class="deck-btn deck-shuffle" id="shuffleBtn" aria-pressed="false">shuffle</button>
+      </div>
       <div class="now">
         <div class="now-title" id="nowTitle">drop the needle</div>
-        <div class="now-credit" id="nowCredit">pick a record from the rack below</div>
+        <div class="now-credit" id="nowCredit">click a sleeve below · click the record to pause · drag it to scratch</div>
         <div class="now-buy" id="nowBuy" hidden>
           <span id="nowPrice"></span>
           <a class="beat-buy" id="nowBuyLink" href="#">Buy this beat</a>

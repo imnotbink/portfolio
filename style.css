@@ -47,15 +47,6 @@ img { max-width: 100%; display: block; }
   line-height: 1;
   letter-spacing: -0.03em;
 }
-.hero-sub { color: var(--muted); margin-top: 20px; }
-.tags { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
-.tags span {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 5px 16px;
-  font-size: 0.78rem;
-  color: var(--muted);
-}
 
 /* ---------- beats: turntable + crate ---------- */
 .section { padding: clamp(50px, 8vh, 90px) clamp(20px, 5vw, 56px); }
@@ -63,7 +54,7 @@ img { max-width: 100%; display: block; }
 .beats-stage {
   position: relative;
   background:
-    linear-gradient(rgba(13, 12, 10, 0.9), rgba(13, 12, 10, 0.96)),
+    linear-gradient(rgba(13, 12, 10, 0.55), rgba(13, 12, 10, 0.68) 55%, rgba(13, 12, 10, 0.92)),
     url("img/container.jpg") center 30% / cover no-repeat;
   border-block: 1px solid var(--line);
 }
@@ -84,8 +75,41 @@ img { max-width: 100%; display: block; }
     #101010;
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.75), inset 0 0 2px rgba(255, 255, 255, 0.25);
 }
-.vinyl.spinning { animation: spin 1.8s linear infinite; }
+.vinyl {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+}
+.vinyl.spinning { animation: spin var(--spin-dur, 1.8s) linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.vinyl.scratching { cursor: grabbing; animation: none; }
+
+.deck-controls {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 30px;
+}
+.deck-btn {
+  border: 1px solid var(--line);
+  background: rgba(13, 12, 10, 0.6);
+  color: var(--text);
+  border-radius: 999px;
+  min-width: 34px; height: 34px;
+  padding: 0 14px;
+  font-size: 0.85rem;
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.deck-btn:hover { border-color: var(--text); }
+.deck-btn[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.deck-speed {
+  color: var(--muted);
+  font-size: 0.8rem;
+  min-width: 52px;
+  font-variant-numeric: tabular-nums;
+}
 
 .vinyl-label {
   position: absolute; inset: 30.5%;

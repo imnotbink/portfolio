@@ -112,6 +112,105 @@ BEATS.forEach((beat, i) => {
 
 const rows = [...rack.children];
 
+// ---------- deck: rAF-driven platter, scratchable ----------
+
+const REV_S = 1.8; // seconds per revolution (~33 rpm)
+const speedLabel = document.getElementById("speedLabel");
+const shuffleBtn = document.getElementById("shuffleBtn");
+let angle = 0;
+let scratching = false;
+let rate = 1;
+let shuffle = false;
+
+// slowed = pitched down, like real vinyl
+audio.preservesPitch = false;
+if ("webkitPreservesPitch" in audio) audio.webkitPreservesPitch = false;
+
+// Normal spin is a CSS keyframe animation (compositor-friendly); JS only
+// drives the platter while scratching.
+function currentVisualAngle() {
+  const m = getComputedStyle(vinyl).transform;
+  if (!m || m === "none") return 0;
+  const [a, b] = m.slice(7, -1).split(",").map(Number);
+  return (Math.atan2(b, a) * 180) / Math.PI;
+}
+
+function ptrAngle(e) {
+  const r = vinyl.getBoundingClientRect();
+  return (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI;
+}
+
+let grab = null;
+vinyl.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  try { vinyl.setPointerCapture(e.pointerId); } catch {}
+  grab = { a: ptrAngle(e), t: performance.now(), moved: 0, wasPlaying: !audio.paused };
+  scratching = true;
+  angle = currentVisualAngle();
+  vinyl.classList.add("scratching");
+  vinyl.style.transform = `rotate(${angle}deg)`;
+  if (grab.wasPlaying) audio.pause();
+});
+vinyl.addEventListener("pointermove", (e) => {
+  if (!grab) return;
+  let d = ptrAngle(e) - grab.a;
+  if (d > 180) d -= 360;
+  if (d < -180) d += 360;
+  grab.a = ptrAngle(e);
+  grab.moved += Math.abs(d);
+  angle += d;
+  vinyl.style.transform = `rotate(${angle}deg)`;
+  // spinning the record scrubs the audio: one revolution = one platter-second
+  if (current >= 0) {
+    const dur = duration();
+    if (isFinite(dur)) {
+      audio.currentTime = Math.min(Math.max(0, audio.currentTime + (d / 360) * REV_S * 4), dur - 0.05);
+    }
+  }
+});
+function release(e) {
+  if (!grab) return;
+  const quickTap = grab.moved < 8 && performance.now() - grab.t < 350;
+  scratching = false;
+  vinyl.classList.remove("scratching");
+  vinyl.style.transform = "";
+  if (quickTap) {
+    // click = play/pause (audio was paused on pointerdown, so a tap while
+    // playing just leaves it paused; a tap while paused starts it)
+    if (current < 0) toggle(0);
+    else if (!grab.wasPlaying) toggle(current);
+  } else if (grab.wasPlaying) {
+    audio.play();
+  }
+  grab = null;
+  render();
+}
+vinyl.addEventListener("pointerup", release);
+vinyl.addEventListener("pointercancel", release);
+
+// ---------- speed + shuffle ----------
+
+function setRate(r) {
+  rate = Math.min(2, Math.max(0.5, Math.round(r * 4) / 4));
+  audio.playbackRate = rate;
+  vinyl.style.setProperty("--spin-dur", REV_S / rate + "s");
+  speedLabel.textContent = rate.toFixed(2) + "×";
+}
+document.getElementById("speedDown").addEventListener("click", () => setRate(rate - 0.25));
+document.getElementById("speedUp").addEventListener("click", () => setRate(rate + 0.25));
+
+function randomIndex() {
+  if (BEATS.length < 2) return 0;
+  let i;
+  do { i = Math.floor(Math.random() * BEATS.length); } while (i === current);
+  return i;
+}
+shuffleBtn.addEventListener("click", () => {
+  shuffle = !shuffle;
+  shuffleBtn.setAttribute("aria-pressed", String(shuffle));
+  if (shuffle) toggle(randomIndex());
+});
+
 // show the first record on the platter before anything plays
 loadLabel(0);
 
@@ -126,6 +225,7 @@ function toggle(i) {
     if (current !== i) {
       current = i;
       audio.src = BEATS[i].file;
+      audio.playbackRate = rate;
       loadLabel(i);
       nowTitle.textContent = BEATS[i].title;
       nowCredit.textContent = credit(BEATS[i]) + (BEATS[i].meta ? " · " + BEATS[i].meta : "");
@@ -142,7 +242,7 @@ function toggle(i) {
 
 function render() {
   const playing = !audio.paused;
-  vinyl.classList.toggle("spinning", playing);
+  vinyl.classList.toggle("spinning", playing && !scratching);
   rows.forEach((r, i) => r.classList.toggle("playing", i === current));
   pbToggle.textContent = playing ? "❚❚" : "▶";
 }
@@ -165,8 +265,8 @@ audio.addEventListener("timeupdate", () => {
 audio.addEventListener("play", render);
 audio.addEventListener("pause", render);
 audio.addEventListener("ended", () => {
-  // auto-advance through the crate, radio style
-  toggle((current + 1) % BEATS.length);
+  // auto-advance: shuffle picks anything, otherwise next in the rack
+  toggle(shuffle ? randomIndex() : (current + 1) % BEATS.length);
 });
 
 pbToggle.addEventListener("click", () => current >= 0 && toggle(current));
