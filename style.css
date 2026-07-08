@@ -37,15 +37,18 @@ img { max-width: 100%; display: block; }
 .nav-links a { color: var(--muted); font-size: 0.85rem; }
 .nav-links a:hover { color: var(--text); }
 
-/* ---------- hero ---------- */
-.hero {
+/* ---------- wordmark: sits behind the deck, Floema-style ---------- */
+.wordmark {
   text-align: center;
-  padding: clamp(70px, 14vh, 150px) 20px 30px;
-}
-.hero h1 {
-  font-size: clamp(4rem, 14vw, 10rem);
+  font-size: clamp(3.2rem, 10.5vw, 8rem);
   line-height: 1;
   letter-spacing: -0.03em;
+  position: relative;
+  z-index: 1;
+  /* the record rides up over the bottom half of the type */
+  margin-bottom: -0.52em;
+  pointer-events: none;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45);
 }
 
 /* ---------- beats: turntable + crate ---------- */
@@ -55,7 +58,8 @@ img { max-width: 100%; display: block; }
   position: relative;
   overflow: clip; /* clips like hidden but doesn't become a scroll container,
                      which would break the view() parallax timeline */
-  border-block: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding-top: clamp(40px, 7vh, 80px);
 }
 /* parallax photo layer — oversized so it can drift as you scroll */
 .stage-bg {
@@ -85,6 +89,7 @@ img { max-width: 100%; display: block; }
 
 .turntable {
   text-align: center;
+  z-index: 2; /* deck rides over the wordmark */
 }
 .vinyl {
   --tint: #6b5ce8;
