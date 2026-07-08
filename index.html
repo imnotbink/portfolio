@@ -31,19 +31,23 @@
   </header>
 
   <section id="beats" class="section beats-stage">
-    <div class="stage">
-      <div class="turntable">
-        <div class="vinyl" id="vinyl">
-          <div class="vinyl-label" id="vinylLabel"></div>
-        </div>
-        <div class="now">
-          <div class="now-title" id="nowTitle">drop the needle</div>
-          <div class="now-credit" id="nowCredit">pick a record from the crate →</div>
+    <div class="turntable">
+      <div class="vinyl" id="vinyl">
+        <div class="vinyl-label" id="vinylLabel"></div>
+      </div>
+      <div class="now">
+        <div class="now-title" id="nowTitle">drop the needle</div>
+        <div class="now-credit" id="nowCredit">pick a record from the rack below</div>
+        <div class="now-buy" id="nowBuy" hidden>
+          <span id="nowPrice"></span>
+          <a class="beat-buy" id="nowBuyLink" href="#">Buy this beat</a>
         </div>
       </div>
-      <ol class="tracklist" id="tracklist"></ol>
     </div>
-    <p class="note">Click a track to spin it · <b>Buy</b> opens an email with the beat pre-filled · $30 lease, exclusives &amp; stems negotiable</p>
+    <div class="rack-wrap">
+      <div class="rack" id="rack"></div>
+    </div>
+    <p class="note">Click a sleeve to spin it · <b>Buy</b> opens an email with the beat pre-filled · $30 lease, exclusives &amp; stems negotiable</p>
   </section>
 
   <section id="photo" class="photo-block">

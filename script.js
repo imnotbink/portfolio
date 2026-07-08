@@ -50,6 +50,21 @@ function motif(i, [, fg, hi]) {
   return shapes[i % shapes.length];
 }
 
+// Sleeve: square cover, same palette/motif as the vinyl label.
+// Consistent format: title bottom-left serif, credit line under it.
+function sleeveSVG(beat, i) {
+  const pal = PALETTES[i % PALETTES.length];
+  const t = beat.title;
+  const size = Math.min(38, 330 / Math.max(1, t.length) * 2.2);
+  return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t} sleeve">
+    <rect width="400" height="400" fill="${pal[0]}"/>
+    <g opacity="0.9" transform="translate(0,-30)">${motif(i, pal)}</g>
+    <text x="26" y="330" font-family="Fraunces, Georgia, serif" font-size="${size}" fill="${pal[2]}">${t}</text>
+    <text x="26" y="358" font-family="Inter, sans-serif" font-size="13" letter-spacing="1" fill="${pal[2]}" opacity="0.75">${credit(beat)}</text>
+    <text x="374" y="358" text-anchor="end" font-family="Inter, sans-serif" font-size="10" letter-spacing="2" fill="${pal[2]}" opacity="0.45">IMNOTBINK · 2026</text>
+  </svg>`;
+}
+
 // Label: title + credit in one consistent layout, hole kept clear.
 function labelSVG(beat, i) {
   const pal = PALETTES[i % PALETTES.length];
@@ -71,7 +86,10 @@ const vinyl = document.getElementById("vinyl");
 const vinylLabel = document.getElementById("vinylLabel");
 const nowTitle = document.getElementById("nowTitle");
 const nowCredit = document.getElementById("nowCredit");
-const list = document.getElementById("tracklist");
+const nowBuy = document.getElementById("nowBuy");
+const nowPrice = document.getElementById("nowPrice");
+const nowBuyLink = document.getElementById("nowBuyLink");
+const rack = document.getElementById("rack");
 const audio = new Audio();
 const bar = document.getElementById("playerBar");
 const pbToggle = document.getElementById("pbToggle");
@@ -81,19 +99,18 @@ const pbTime = document.getElementById("pbTime");
 let current = -1;
 
 BEATS.forEach((beat, i) => {
-  const li = document.createElement("li");
-  li.innerHTML = `
-    <div class="trk-main">
-      <div class="trk-title">${beat.title}</div>
-      <div class="trk-sub">${credit(beat)}${beat.meta ? " · " + beat.meta : ""}</div>
-    </div>
-    <span class="trk-price">$${PRICE}</span>
-    <a class="beat-buy" href="mailto:${EMAIL}?subject=${encodeURIComponent(`Beat purchase: "${beat.title}" ($${PRICE} lease)`)}&body=${encodeURIComponent(`Hey Tyler, I want to buy the "${beat.title}" beat (${credit(beat)}).`)}">Buy</a>`;
-  li.addEventListener("click", (e) => { if (!e.target.closest(".beat-buy")) toggle(i); });
-  list.appendChild(li);
+  const el = document.createElement("div");
+  el.className = "sleeve";
+  el.setAttribute("role", "button");
+  el.setAttribute("tabindex", "0");
+  el.setAttribute("aria-label", `Play ${beat.title}`);
+  el.innerHTML = `${sleeveSVG(beat, i)}<span class="sleeve-caption">${beat.title} · $${PRICE}</span>`;
+  el.addEventListener("click", () => toggle(i));
+  el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(i); } });
+  rack.appendChild(el);
 });
 
-const rows = [...list.children];
+const rows = [...rack.children];
 
 // show the first record on the platter before anything plays
 loadLabel(0);
@@ -112,6 +129,9 @@ function toggle(i) {
       loadLabel(i);
       nowTitle.textContent = BEATS[i].title;
       nowCredit.textContent = credit(BEATS[i]) + (BEATS[i].meta ? " · " + BEATS[i].meta : "");
+      nowPrice.textContent = "$" + PRICE + " lease";
+      nowBuyLink.href = `mailto:${EMAIL}?subject=${encodeURIComponent(`Beat purchase: "${BEATS[i].title}" ($${PRICE} lease)`)}&body=${encodeURIComponent(`Hey Tyler, I want to buy the "${BEATS[i].title}" beat (${credit(BEATS[i])}).`)}`;
+      nowBuy.hidden = false;
       pbTitle.textContent = BEATS[i].title;
       bar.hidden = false;
     }
