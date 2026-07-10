@@ -119,6 +119,9 @@ function addSleeve(beat, i) {
   el.style.setProperty("--lean", -63 + (((i * 4) % 9) - 4) + "deg");
   el.style.setProperty("--tilt", ((((i * 53) % 5) - 2) * 0.7).toFixed(1) + "deg");
   el.style.setProperty("--lift", (((i * 29) % 7) - 3) + "px");
+  // descending stack: with the fan leaning right-edge-forward, card i's spine
+  // physically sits in front of card i+1 — paint it that way so spines show
+  el.style.zIndex = String(900 - i);
   el.innerHTML = `
     <div class="box">
       <div class="face front">${sleeveSVG(beat, i)}<div class="gloss"></div></div>
@@ -496,17 +499,50 @@ rackWrap.addEventListener("pointermove", (e) => {
   if (e.pointerType !== "mouse") return; // touch keeps native swipe
   const r = rackWrap.getBoundingClientRect();
   rackPointer = (e.clientX - r.left) / r.width;
+  pickLifted(e.clientX);
 });
-rackWrap.addEventListener("pointerleave", () => { rackPointer = null; });
+rackWrap.addEventListener("pointerleave", () => { rackPointer = null; setLifted(null); });
 (function rackGlide() {
   requestAnimationFrame(rackGlide);
   if (rackPointer === null) return;
-  const edge = 0.2; // outer 20% on each side; dead zone in the middle so hovering to click stays still
+  const edge = 0.18; // outer edges only; dead zone in the middle so hovering to click stays still
   let v = 0;
   if (rackPointer < edge) v = -((edge - rackPointer) / edge);
   else if (rackPointer > 1 - edge) v = (rackPointer - (1 - edge)) / edge;
-  if (v) rackWrap.scrollLeft += v * Math.abs(v) * 22; // eased ramp, ~22px/frame max
+  if (v) rackWrap.scrollLeft += v * Math.abs(v) * 8; // eased ramp, ~8px/frame max
 })();
+
+// ---------- confident hover: JS picks ONE card and holds it ----------
+// CSS :hover flickered in the overlap zones: lifting a card slides it out
+// from under the cursor, the neighbor catches :hover, repeat forever.
+// Instead the cursor's X picks the sleeve whose (static) layout slot it's
+// in — with hysteresis, so it only lets go when you clearly cross over.
+
+let liftedEl = null;
+function setLifted(el) {
+  if (liftedEl === el) return;
+  if (liftedEl) liftedEl.classList.remove("lifted");
+  liftedEl = el;
+  if (el) el.classList.add("lifted");
+}
+function pickLifted(clientX) {
+  // cursor X in the rack's own (unscrolled, untransformed) coordinates
+  const x = clientX - rackWrap.getBoundingClientRect().left + rackWrap.scrollLeft - rack.offsetLeft;
+  let best = null, bestDist = Infinity, currentDist = Infinity;
+  for (const el of rows) {
+    const center = el.offsetLeft + el.offsetWidth / 2;
+    const dist = Math.abs(x - center);
+    if (dist < bestDist) { bestDist = dist; best = el; }
+    if (el === liftedEl) currentDist = dist;
+  }
+  // hold the current pick unless the new one is clearly closer (40px says
+  // "I've moved on", not "I drifted a hair past the midpoint")
+  if (liftedEl && best !== liftedEl && bestDist > currentDist - 40) return;
+  setLifted(best);
+}
+// keyboard focus lifts too (sleeves are tabbable buttons)
+rack.addEventListener("focusin", (e) => { const s = e.target.closest(".sleeve"); if (s) setLifted(s); });
+rack.addEventListener("focusout", () => setLifted(null));
 
 // ---------- live 5★ catalog from the BeatPlayer app ----------
 // The Windows BeatPlayer serves /api/beats with CORS open on GETs.

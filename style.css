@@ -285,17 +285,20 @@ img { max-width: 100%; display: block; }
   transform-origin: center center;
   /* one springy arc: reads as lift-then-turn, reverses cleanly */
   transition: transform 0.55s cubic-bezier(0.3, 1.2, 0.3, 1);
-  z-index: 1;
+  /* z-index set per-card from JS, DESCENDING: the fan leans right-edge-forward,
+     so each card's spine physically sits in front of the next card */
   /* NOTE: no filter/drop-shadow or box-reflect here — with ~60 cards those
      force per-frame repaints of the whole row. Shadows live on the faces
      (plain box-shadow composites for free) so each sleeve stays one GPU layer. */
   will-change: transform;
 }
 .sleeve:last-child { margin-right: 0; }
-/* hover / playing: the box lifts out of the row and swings flat to face the user */
-.sleeve:hover, .sleeve.playing {
+/* lifted (JS-picked hover) / playing: the box lifts out of the row and swings
+   flat to face the user. JS owns the pick — CSS :hover flickered because the
+   lift moves the card out from under the cursor. */
+.sleeve.lifted, .sleeve.playing {
   transform: perspective(1000px) rotateY(0deg) rotateZ(0deg) translateY(-46px) translateZ(60px);
-  z-index: 10;
+  z-index: 999 !important;
 }
 
 /* ---- the sleeve is a real box: front/back/spine/top/bottom faces ---- */
@@ -367,7 +370,7 @@ img { max-width: 100%; display: block; }
   transition: opacity 0.25s ease;
   pointer-events: none;
 }
-.sleeve:hover .sleeve-caption, .sleeve.playing .sleeve-caption { opacity: 1; }
+.sleeve.lifted .sleeve-caption, .sleeve.playing .sleeve-caption { opacity: 1; }
 
 .note { text-align: center; color: var(--muted); font-size: 0.82rem; margin-top: 40px; }
 .note b { color: var(--text); font-weight: 500; }
