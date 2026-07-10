@@ -388,16 +388,22 @@ function drawWave() {
     : (isFinite(dur) && dur > 0 ? audio.currentTime / dur : 0);
   waveCtx.clearRect(0, 0, w, h);
   const mid = h * 0.68; // top-weighted mirror, SoundCloud-style
-  const bw = w / WAVE_BUCKETS;
-  const gap = Math.max(1, bw * 0.28);
-  for (let b = 0; b < WAVE_BUCKETS; b++) {
-    const x = b * bw;
-    const played = (b + 0.5) / WAVE_BUCKETS <= frac;
-    const p = Math.max(wavePeaks[b], 0.025);
-    waveCtx.fillStyle = played ? waveAccent : "rgba(242, 237, 228, 0.26)";
-    waveCtx.fillRect(x, mid - p * mid * 0.94, bw - gap, Math.max(1, p * mid * 0.94));
-    waveCtx.globalAlpha = 0.45;
-    waveCtx.fillRect(x, mid + 2, bw - gap, Math.max(1, p * (h - mid) * 0.9));
+  // crisp fixed-width bars; resample the peak buckets to fit
+  // (480 buckets into a ~340px canvas = sub-pixel mush otherwise)
+  const dpr = window.devicePixelRatio || 1;
+  const barW = Math.max(2, Math.round(2 * dpr));
+  const gapW = Math.max(1, Math.round(dpr));
+  for (let x = 0; x < w; x += barW + gapW) {
+    // peak = loudest bucket under this bar, so transients don't vanish
+    const b0 = Math.floor((x / w) * WAVE_BUCKETS);
+    const b1 = Math.min(WAVE_BUCKETS - 1, Math.floor(((x + barW) / w) * WAVE_BUCKETS));
+    let p = 0.035;
+    for (let b = b0; b <= b1; b++) if (wavePeaks[b] > p) p = wavePeaks[b];
+    const played = (x + barW / 2) / w <= frac;
+    waveCtx.fillStyle = played ? waveAccent : "#b9b2a4"; // solid — alpha bars vanish against the photo
+    waveCtx.fillRect(x, mid - p * mid * 0.94, barW, Math.max(1.5, p * mid * 0.94));
+    waveCtx.globalAlpha = 0.5;
+    waveCtx.fillRect(x, mid + 2, barW, Math.max(1, p * (h - mid) * 0.9));
     waveCtx.globalAlpha = 1;
   }
   // hover ghost line
@@ -471,6 +477,36 @@ if (!CSS.supports("animation-timeline: view()")) {
   addEventListener("resize", parallax);
   parallax();
 }
+
+// ---------- rack scrolling: wheel + edge auto-scroll ----------
+// The rack is a horizontal row, but people scroll vertically — translate
+// the wheel for them (no shift-scrolling), and glide the row when the
+// mouse drifts toward either edge, Foliom-style.
+
+const rackWrap = document.querySelector(".rack-wrap");
+rackWrap.addEventListener("wheel", (e) => {
+  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+    e.preventDefault();
+    rackWrap.scrollLeft += e.deltaY;
+  }
+}, { passive: false });
+
+let rackPointer = null; // 0..1 across the rack, mouse only
+rackWrap.addEventListener("pointermove", (e) => {
+  if (e.pointerType !== "mouse") return; // touch keeps native swipe
+  const r = rackWrap.getBoundingClientRect();
+  rackPointer = (e.clientX - r.left) / r.width;
+});
+rackWrap.addEventListener("pointerleave", () => { rackPointer = null; });
+(function rackGlide() {
+  requestAnimationFrame(rackGlide);
+  if (rackPointer === null) return;
+  const edge = 0.2; // outer 20% on each side; dead zone in the middle so hovering to click stays still
+  let v = 0;
+  if (rackPointer < edge) v = -((edge - rackPointer) / edge);
+  else if (rackPointer > 1 - edge) v = (rackPointer - (1 - edge)) / edge;
+  if (v) rackWrap.scrollLeft += v * Math.abs(v) * 22; // eased ramp, ~22px/frame max
+})();
 
 // ---------- live 5★ catalog from the BeatPlayer app ----------
 // The Windows BeatPlayer serves /api/beats with CORS open on GETs.

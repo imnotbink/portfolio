@@ -194,6 +194,10 @@ img { max-width: 100%; display: block; }
   position: relative;
   margin-top: 14px;
   height: 54px;
+  /* dark plate so the bars read against the bright photo backdrop */
+  background: rgba(13, 12, 10, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 .wave-wrap[hidden] { display: none; }
 #wave {
