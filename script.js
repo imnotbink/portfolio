@@ -56,9 +56,10 @@ function sleeveSVG(beat, i) {
   const pal = PALETTES[i % PALETTES.length];
   const t = beat.title;
   const size = Math.min(38, 330 / Math.max(1, t.length) * 2.2);
+  // NOTE: no feTurbulence grain here — rasterizing noise in ~60 sleeves
+  // was a real scroll-lag source. The vignette carries the depth.
   return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t} sleeve">
     <defs>
-      <filter id="grain${i}"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="${i * 3 + 1}" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
       <radialGradient id="vig${i}" cx="50%" cy="42%" r="75%">
         <stop offset="60%" stop-color="#000" stop-opacity="0"/>
         <stop offset="100%" stop-color="#000" stop-opacity="0.32"/>
@@ -69,7 +70,6 @@ function sleeveSVG(beat, i) {
     <text x="26" y="330" font-family="Fraunces, Georgia, serif" font-size="${size}" fill="${pal[2]}">${t}</text>
     <text x="26" y="358" font-family="Inter, sans-serif" font-size="13" letter-spacing="1" fill="${pal[2]}" opacity="0.75">${credit(beat)}</text>
     ${credit(beat).length <= 26 ? `<text x="374" y="358" text-anchor="end" font-family="Inter, sans-serif" font-size="10" letter-spacing="2" fill="${pal[2]}" opacity="0.45">IMNOTBINK · ${beat.year || 2026}</text>` : ""}
-    <rect width="400" height="400" filter="url(#grain${i})" opacity="0.055"/>
     <rect width="400" height="400" fill="url(#vig${i})"/>
   </svg>`;
 }

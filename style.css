@@ -282,9 +282,10 @@ img { max-width: 100%; display: block; }
   /* one springy arc: reads as lift-then-turn, reverses cleanly */
   transition: transform 0.55s cubic-bezier(0.3, 1.2, 0.3, 1);
   z-index: 1;
-  filter: drop-shadow(-20px 28px 20px rgba(0, 0, 0, 0.7));
-  /* glossy floor */
-  -webkit-box-reflect: below 8px linear-gradient(transparent 78%, rgba(255, 255, 255, 0.10));
+  /* NOTE: no filter/drop-shadow or box-reflect here — with ~60 cards those
+     force per-frame repaints of the whole row. Shadows live on the faces
+     (plain box-shadow composites for free) so each sleeve stays one GPU layer. */
+  will-change: transform;
 }
 .sleeve:last-child { margin-right: 0; }
 /* hover / playing: the box lifts out of the row and swings flat to face the user */
@@ -304,6 +305,8 @@ img { max-width: 100%; display: block; }
   transform: translateZ(16px);
   overflow: hidden;
   border-radius: 2px;
+  /* cheap composited shadow instead of the old row-wide drop-shadow filter */
+  box-shadow: -22px 30px 26px rgba(0, 0, 0, 0.55);
 }
 .face.front svg { width: 100%; height: 100%; display: block; }
 .gloss {
