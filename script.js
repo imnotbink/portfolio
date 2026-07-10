@@ -252,6 +252,7 @@ function toggle(i) {
       audio.src = BEATS[i].file;
       audio.playbackRate = rate;
       loadLabel(i);
+      loadWave(i);
       nowTitle.textContent = BEATS[i].title;
       nowCredit.textContent = credit(BEATS[i]) + (BEATS[i].meta ? " · " + BEATS[i].meta : "");
       nowPrice.textContent = "$" + PRICE + " lease";
@@ -292,6 +293,165 @@ audio.addEventListener("pause", render);
 audio.addEventListener("ended", () => {
   // auto-advance: shuffle picks anything, otherwise next in the rack
   toggle(shuffle ? randomIndex() : (current + 1) % BEATS.length);
+});
+
+// ---------- waveform scrubber ----------
+// Real decoded peaks per beat (cached). Everything is rAF-driven: the
+// playhead reads the media clock every frame, and drag-seeks coalesce to
+// one currentTime write per frame so the seek pipeline never clogs.
+
+const waveWrap = document.getElementById("waveWrap");
+const waveCanvas = document.getElementById("wave");
+const waveHoverTime = document.getElementById("waveHoverTime");
+const waveCtx = waveCanvas.getContext("2d");
+const peaksCache = new Map();
+let audioCtx = null;
+let wavePeaks = null;   // Float32Array for the current beat
+let waveAccent = "#f2ede4";
+let waveToken = 0;      // stale-decode guard when hopping between beats
+let hoverX = null;      // px within canvas, or null
+let dragX = null;       // px while scrubbing, or null
+let pendingSeek = null; // seconds, applied once per frame
+
+const WAVE_BUCKETS = 480;
+
+function computePeaks(buf) {
+  const peaks = new Float32Array(WAVE_BUCKETS);
+  const step = Math.floor(buf.length / WAVE_BUCKETS);
+  for (let ch = 0; ch < buf.numberOfChannels; ch++) {
+    const data = buf.getChannelData(ch);
+    for (let b = 0; b < WAVE_BUCKETS; b++) {
+      let max = 0;
+      const start = b * step;
+      // stride through the bucket — plenty of samples for a stable peak
+      for (let s = start; s < start + step; s += 16) {
+        const v = Math.abs(data[s]);
+        if (v > max) max = v;
+      }
+      if (max > peaks[b]) peaks[b] = max;
+    }
+  }
+  // normalize so quiet mixes still fill the lane
+  let top = 0;
+  for (const v of peaks) if (v > top) top = v;
+  if (top > 0) for (let b = 0; b < WAVE_BUCKETS; b++) peaks[b] /= top;
+  return peaks;
+}
+
+async function loadWave(i) {
+  const token = ++waveToken;
+  wavePeaks = null;
+  waveAccent = PALETTES[i % PALETTES.length][1];
+  waveWrap.hidden = false;
+  sizeWave();
+  if (!peaksCache.has(i)) {
+    waveCanvas.classList.add("loading");
+    try {
+      const res = await fetch(BEATS[i].file);
+      const raw = await res.arrayBuffer();
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      peaksCache.set(i, computePeaks(await audioCtx.decodeAudioData(raw)));
+    } catch (e) {
+      peaksCache.set(i, null); // undecodable: leave the lane empty, audio still plays
+    }
+  }
+  if (token !== waveToken) return; // user already clicked another sleeve
+  waveCanvas.classList.remove("loading");
+  wavePeaks = peaksCache.get(i);
+}
+
+function sizeWave() {
+  const r = waveWrap.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  if (!r.width) return;
+  waveCanvas.width = Math.round(r.width * dpr);
+  waveCanvas.height = Math.round(r.height * dpr);
+}
+new ResizeObserver(sizeWave).observe(waveWrap);
+
+function drawWave() {
+  requestAnimationFrame(drawWave);
+  // one seek per frame, max — this is what keeps dragging silky
+  if (pendingSeek !== null && audio.readyState >= 1) {
+    audio.currentTime = pendingSeek;
+    pendingSeek = null;
+  }
+  if (!wavePeaks || waveWrap.hidden) return;
+  const w = waveCanvas.width, h = waveCanvas.height;
+  if (!w) return;
+  const dur = duration();
+  // while dragging, the playhead follows the pointer immediately;
+  // audio catches up a frame behind
+  const frac = dragX !== null
+    ? dragX / waveCanvas.clientWidth
+    : (isFinite(dur) && dur > 0 ? audio.currentTime / dur : 0);
+  waveCtx.clearRect(0, 0, w, h);
+  const mid = h * 0.68; // top-weighted mirror, SoundCloud-style
+  const bw = w / WAVE_BUCKETS;
+  const gap = Math.max(1, bw * 0.28);
+  for (let b = 0; b < WAVE_BUCKETS; b++) {
+    const x = b * bw;
+    const played = (b + 0.5) / WAVE_BUCKETS <= frac;
+    const p = Math.max(wavePeaks[b], 0.025);
+    waveCtx.fillStyle = played ? waveAccent : "rgba(242, 237, 228, 0.26)";
+    waveCtx.fillRect(x, mid - p * mid * 0.94, bw - gap, Math.max(1, p * mid * 0.94));
+    waveCtx.globalAlpha = 0.45;
+    waveCtx.fillRect(x, mid + 2, bw - gap, Math.max(1, p * (h - mid) * 0.9));
+    waveCtx.globalAlpha = 1;
+  }
+  // hover ghost line
+  if (hoverX !== null && dragX === null) {
+    waveCtx.fillStyle = "rgba(242, 237, 228, 0.55)";
+    waveCtx.fillRect(hoverX * (w / waveCanvas.clientWidth), 0, Math.max(1, window.devicePixelRatio || 1), h);
+  }
+}
+requestAnimationFrame(drawWave);
+
+function waveFrac(e) {
+  const r = waveCanvas.getBoundingClientRect();
+  return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+}
+
+function waveSeek(e) {
+  const dur = duration();
+  const frac = waveFrac(e);
+  dragX = frac * waveCanvas.clientWidth;
+  if (isFinite(dur)) pendingSeek = Math.min(frac * dur, dur - 0.05);
+  waveHoverTime.hidden = !isFinite(dur);
+  if (isFinite(dur)) {
+    waveHoverTime.textContent = fmt(frac * dur);
+    waveHoverTime.style.left = dragX + "px";
+  }
+}
+
+waveCanvas.addEventListener("pointerdown", (e) => {
+  if (current < 0) return;
+  e.preventDefault();
+  try { waveCanvas.setPointerCapture(e.pointerId); } catch {}
+  waveSeek(e);
+});
+waveCanvas.addEventListener("pointermove", (e) => {
+  if (dragX !== null) {
+    waveSeek(e);
+  } else {
+    hoverX = waveFrac(e) * waveCanvas.clientWidth;
+    const dur = duration();
+    waveHoverTime.hidden = !isFinite(dur) || current < 0;
+    if (!waveHoverTime.hidden) {
+      waveHoverTime.textContent = fmt(waveFrac(e) * dur);
+      waveHoverTime.style.left = hoverX + "px";
+    }
+  }
+});
+function waveRelease() {
+  dragX = null;
+  waveHoverTime.hidden = hoverX === null;
+}
+waveCanvas.addEventListener("pointerup", waveRelease);
+waveCanvas.addEventListener("pointercancel", waveRelease);
+waveCanvas.addEventListener("pointerleave", () => {
+  hoverX = null;
+  if (dragX === null) waveHoverTime.hidden = true;
 });
 
 // ---------- parallax photo behind the deck ----------

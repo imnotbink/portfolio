@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "portfolio",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "4173", "--directory", "/Users/imnotbink/Downloads/Claude Apps/Portfolio"],
-      "port": 4173
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.js"],
+      "port": 4174
     }
   ]
 }
