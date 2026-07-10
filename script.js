@@ -68,7 +68,7 @@ function sleeveSVG(beat, i) {
     <g opacity="0.9" transform="translate(0,-30)">${motif(i, pal)}</g>
     <text x="26" y="330" font-family="Fraunces, Georgia, serif" font-size="${size}" fill="${pal[2]}">${t}</text>
     <text x="26" y="358" font-family="Inter, sans-serif" font-size="13" letter-spacing="1" fill="${pal[2]}" opacity="0.75">${credit(beat)}</text>
-    ${credit(beat).length <= 26 ? `<text x="374" y="358" text-anchor="end" font-family="Inter, sans-serif" font-size="10" letter-spacing="2" fill="${pal[2]}" opacity="0.45">IMNOTBINK · 2026</text>` : ""}
+    ${credit(beat).length <= 26 ? `<text x="374" y="358" text-anchor="end" font-family="Inter, sans-serif" font-size="10" letter-spacing="2" fill="${pal[2]}" opacity="0.45">IMNOTBINK · ${beat.year || 2026}</text>` : ""}
     <rect width="400" height="400" filter="url(#grain${i})" opacity="0.055"/>
     <rect width="400" height="400" fill="url(#vig${i})"/>
   </svg>`;
@@ -85,7 +85,7 @@ function labelSVG(beat, i) {
     <circle cx="200" cy="200" r="192" fill="none" stroke="${pal[2]}" stroke-width="2" opacity="0.5"/>
     <text x="200" y="130" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="${size}" fill="${pal[2]}">${t}</text>
     <text x="200" y="292" text-anchor="middle" font-family="Inter, sans-serif" font-size="17" letter-spacing="1" fill="${pal[2]}" opacity="0.85">${credit(beat)}</text>
-    <text x="200" y="330" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" letter-spacing="3" fill="${pal[2]}" opacity="0.5">IMNOTBINK · 2026</text>
+    <text x="200" y="330" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" letter-spacing="3" fill="${pal[2]}" opacity="0.5">IMNOTBINK · ${beat.year || 2026}</text>
   </svg>`;
 }
 
@@ -108,7 +108,7 @@ const pbProgress = document.getElementById("pbProgress");
 const pbTime = document.getElementById("pbTime");
 let current = -1;
 
-BEATS.forEach((beat, i) => {
+function addSleeve(beat, i) {
   const el = document.createElement("div");
   el.className = "sleeve";
   el.setAttribute("role", "button");
@@ -131,9 +131,10 @@ BEATS.forEach((beat, i) => {
   el.addEventListener("click", () => toggle(i));
   el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(i); } });
   rack.appendChild(el);
-});
+}
+BEATS.forEach(addSleeve);
 
-const rows = [...rack.children];
+let rows = [...rack.children];
 
 // ---------- deck: rAF-driven platter, scratchable ----------
 
@@ -470,6 +471,133 @@ if (!CSS.supports("animation-timeline: view()")) {
   addEventListener("resize", parallax);
   parallax();
 }
+
+// ---------- live 5★ catalog from the BeatPlayer app ----------
+// The Windows BeatPlayer serves /api/beats with CORS open on GETs.
+// Anything Tyler rates 5★ there shows up here automatically — streamed
+// straight from the player via its stable per-file /audio/<key> URLs.
+
+const LIVE_BASES = [
+  "http://localhost:8422",                          // same PC
+  "https://desktop-19v84r1-1.tailcca76a.ts.net",    // anywhere (Tailscale funnel)
+];
+let liveBase = localStorage.getItem("bp-base");
+const liveKeys = new Set();
+const liveNorms = new Set();
+const normTitle = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+// snapshot of the hand-curated catalog, for dedupe
+const staticNorms = BEATS.map((b) => normTitle(b.title));
+
+// raw player titles look like "@imnotbink Spaz Emaj 126bpm" — clean them
+// down to the beat name, mine BPM + key for the meta line, and turn any
+// collaborator names buried in the title into proper credits
+const KNOWN_COLLABS = {
+  schell: "schell", dxnieldior: "dxnieldior", zouni: "zouni",
+  praizewa: "praizewa", wa: "praizewa",
+  rioleyva: "rioleyva", "rio leyva": "rioleyva", rio: "rioleyva",
+  vendr: "vendr", dunc: "dunc", junkroll: "junkroll", jtxperc: "jtxperc",
+  chaarlew: "chaarlew", kroam: "kroam", synthetic: "synthetic",
+  tyler: null, // his own name, strip without crediting
+};
+function parseLiveTitle(raw) {
+  let t = " " + raw.replace(/[<>&"]/g, " ").replace(/_/g, " ") + " ";
+  const meta = [];
+  const bpm = t.match(/\b(\d{2,3})\s*bpm\b|\bbpm\s*(\d{2,3})\b/i) || t.match(/\b(1[2-9]\d)\b/);
+  if (bpm) meta.push((bpm[1] || bpm[2]) + " BPM");
+  const key = t.match(/\b([A-G][#♯b♭]?)\s?(maj(?:or)?|min(?:or)?)\b/i);
+  if (key) meta.push(key[1].toUpperCase().replace("B", "♭").replace("#", "♯") + " " + key[2].slice(0, 3).toLowerCase());
+  const collabs = [];
+  t = t
+    .replace(/\[[^\]]*\]|\([^)]*\)/g, " ")             // [D# Eb Minor], (loop...)
+    .replace(/@[\w.]+/g, " ")                          // @handles
+    .replace(/\bprod\.?\b/gi, " ")
+    .replace(/\b(\d{2,3})\s*bpm\b|\bbpm\s*(\d{2,3})\b/gi, " ")
+    .replace(/\b[A-G][#♯b♭]?\s?(maj(?:or)?|min(?:or)?)\b/gi, " ")
+    .replace(/\b\d{2,3}\b/g, " ")                      // stray tempo numbers
+    .replace(/\bimnotbink\b/gi, " ");
+  for (const name of Object.keys(KNOWN_COLLABS)) {
+    const re = new RegExp("\\b" + name.replace(" ", "\\s+") + "\\b", "gi");
+    if (re.test(t)) {
+      t = t.replace(re, " ");
+      const cred = KNOWN_COLLABS[name];
+      if (cred && !collabs.includes(cred)) collabs.push(cred);
+    }
+  }
+  t = t
+    .replace(/\s+[x×]\s+/gi, " ")
+    .replace(/[-,.;:+]+/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return {
+    title: (t || raw.replace(/[<>&"]/g, " ").trim()).toLowerCase(),
+    meta: meta.join(" · "),
+    collabs,
+  };
+}
+
+async function fetchLiveBeats() {
+  const bases = liveBase ? [liveBase, ...LIVE_BASES.filter((b) => b !== liveBase)] : LIVE_BASES;
+  for (const base of bases) {
+    try {
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 4000);
+      const res = await fetch(base + "/api/beats", { signal: ctl.signal });
+      clearTimeout(timer);
+      if (!res.ok) continue;
+      const all = await res.json();
+      liveBase = base;
+      localStorage.setItem("bp-base", base);
+      return all.filter((b) => b.r === 5 && b.c === "Beat");
+    } catch (e) { /* player offline on this base — try the next */ }
+  }
+  return null;
+}
+
+function applyLive(fives) {
+  if (!liveBase) return;
+  let added = 0;
+  // newest exports first, so fresh heat lands at the front of the live block
+  [...fives].sort((a, b) => (b.d || "").localeCompare(a.d || "")).forEach((b) => {
+    if (liveKeys.has(b.k)) return;
+    const n = normTitle(b.t);
+    if (staticNorms.some((s) => n.includes(s) || s.includes(n))) return; // already in the curated rack
+    const parsed = parseLiveTitle(b.t);
+    // same beat can be 5★'d as two files (project export + old bounce) — one sleeve only
+    if (liveNorms.has(normTitle(parsed.title))) return;
+    liveKeys.add(b.k);
+    liveNorms.add(normTitle(parsed.title));
+    const cred = [...new Set(
+      [...(b.w || []), ...parsed.collabs]
+        .map((w) => KNOWN_COLLABS[w.toLowerCase()] !== undefined ? KNOWN_COLLABS[w.toLowerCase()] : w)
+        .filter((w) => w && normTitle(w) !== "imnotbink")
+    )];
+    BEATS.push({
+      file: liveBase + "/audio/" + b.k,
+      title: parsed.title,
+      meta: parsed.meta,
+      prod: ["imnotbink", ...cred],
+      year: parseInt((b.d || "").slice(0, 4), 10) || b.y,
+      live: true,
+    });
+    addSleeve(BEATS[BEATS.length - 1], BEATS.length - 1);
+    added++;
+  });
+  if (added) rows = [...rack.children];
+}
+
+async function refreshLive() {
+  const fives = await fetchLiveBeats();
+  if (fives) {
+    applyLive(fives);
+    localStorage.setItem("bp-fives", JSON.stringify(fives));
+  } else if (!liveKeys.size) {
+    // player unreachable: fall back to the last catalog we saw
+    try { applyLive(JSON.parse(localStorage.getItem("bp-fives") || "[]")); } catch (e) {}
+  }
+}
+refreshLive();
+setInterval(refreshLive, 60000); // newly 5-starred beats appear within a minute
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshLive(); });
 
 pbToggle.addEventListener("click", () => current >= 0 && toggle(current));
 document.querySelector(".pb-track").addEventListener("click", (e) => {
