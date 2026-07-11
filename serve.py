@@ -14,7 +14,8 @@ class H(BaseHTTPRequestHandler):
         file = os.path.normpath(os.path.join(ROOT, path.lstrip("/") or "index.html"))
         if os.path.isdir(file):
             file = os.path.join(file, "index.html")
-        if not file.startswith(ROOT) or not os.path.isfile(file):
+        # separator-anchored so "..\Portfolio - Copy" style siblings can't slip past
+        if not (file == ROOT or file.startswith(ROOT + os.sep)) or not os.path.isfile(file):
             self.send_response(404); self.end_headers(); return
         size = os.path.getsize(file)
         ctype = mimetypes.guess_type(file)[0] or "application/octet-stream"
