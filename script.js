@@ -108,7 +108,17 @@ const pbProgress = document.getElementById("pbProgress");
 const pbTime = document.getElementById("pbTime");
 let current = -1;
 
-function addSleeve(beat, i) {
+// ---------- virtualized rack ----------
+// The catalog can run to hundreds of beats (all the 4★/5★ from the player).
+// Rendering every 3D sleeve at once froze the browser, so the rack is
+// windowed: sleeves are absolutely positioned at fixed slots, and only the
+// ones near the viewport actually exist in the DOM (~25 at a time). Layout
+// is deterministic from the index, so scroll math needs no measurement.
+
+const mounted = new Map(); // beat index -> live element
+let sleeveW = 0, step = 0; // px; recomputed on layout/resize
+
+function buildSleeve(beat, i) {
   const el = document.createElement("div");
   el.className = "sleeve";
   el.setAttribute("role", "button");
@@ -119,9 +129,10 @@ function addSleeve(beat, i) {
   el.style.setProperty("--lean", -63 + (((i * 4) % 9) - 4) + "deg");
   el.style.setProperty("--tilt", ((((i * 53) % 5) - 2) * 0.7).toFixed(1) + "deg");
   el.style.setProperty("--lift", (((i * 29) % 7) - 3) + "px");
+  el.style.left = (i * step) + "px";
   // descending stack: with the fan leaning right-edge-forward, card i's spine
   // physically sits in front of card i+1 — paint it that way so spines show
-  el.style.zIndex = String(900 - i);
+  el.style.zIndex = String(9000 - i);
   el.innerHTML = `
     <div class="box">
       <div class="face front">${sleeveSVG(beat, i)}<div class="gloss"></div></div>
@@ -133,11 +144,40 @@ function addSleeve(beat, i) {
     <span class="sleeve-caption">${beat.title} · $${PRICE}</span>`;
   el.addEventListener("click", () => toggle(i));
   el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(i); } });
-  rack.appendChild(el);
+  if (i === current) el.classList.add("playing");
+  if (i === liftedIdx) el.classList.add("lifted");
+  return el;
 }
-BEATS.forEach(addSleeve);
 
-let rows = [...rack.children];
+function layoutRack() {
+  // clamp(220px, 25vw, 310px) mirrored in JS so slot math needs no reflow
+  sleeveW = Math.max(220, Math.min(310, window.innerWidth * 0.25));
+  const ratio = window.matchMedia("(max-width: 700px)").matches ? 0.58 : 0.44;
+  step = sleeveW * ratio;
+  const n = BEATS.length;
+  rack.style.width = (n ? step * (n - 1) + sleeveW : 0) + "px";
+  rack.style.height = sleeveW + "px";
+  mounted.forEach((el, i) => { el.style.left = (i * step) + "px"; });
+  virtualize();
+}
+
+function virtualize() {
+  if (!step) return;
+  const originX = rackWrap.scrollLeft - rack.offsetLeft;
+  const buffer = rackWrap.clientWidth; // one screen of pre-render on each side
+  const first = Math.max(0, Math.floor((originX - buffer) / step));
+  const last = Math.min(BEATS.length - 1, Math.ceil((originX + rackWrap.clientWidth + buffer) / step));
+  mounted.forEach((el, i) => {
+    if (i < first || i > last) { el.remove(); mounted.delete(i); }
+  });
+  for (let i = first; i <= last; i++) {
+    if (!mounted.has(i)) {
+      const el = buildSleeve(BEATS[i], i);
+      rack.appendChild(el);
+      mounted.set(i, el);
+    }
+  }
+}
 
 // ---------- deck: rAF-driven platter, scratchable ----------
 
@@ -273,7 +313,7 @@ function toggle(i) {
 function render() {
   const playing = !audio.paused;
   platter.classList.toggle("spinning", playing && !scratching);
-  rows.forEach((r, i) => r.classList.toggle("playing", i === current));
+  mounted.forEach((el, i) => el.classList.toggle("playing", i === current));
   pbToggle.textContent = playing ? "❚❚" : "▶";
 }
 
@@ -512,37 +552,50 @@ rackWrap.addEventListener("pointerleave", () => { rackPointer = null; setLifted(
   if (v) rackWrap.scrollLeft += v * Math.abs(v) * 8; // eased ramp, ~8px/frame max
 })();
 
+// keep the window in sync with scroll (throttled to one pass per frame) + resize
+let virtQueued = false;
+rackWrap.addEventListener("scroll", () => {
+  if (virtQueued) return;
+  virtQueued = true;
+  requestAnimationFrame(() => { virtQueued = false; virtualize(); });
+}, { passive: true });
+let resizeTimer;
+addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(layoutRack, 120); });
+
 // ---------- confident hover: JS picks ONE card and holds it ----------
 // CSS :hover flickered in the overlap zones: lifting a card slides it out
 // from under the cursor, the neighbor catches :hover, repeat forever.
 // Instead the cursor's X picks the sleeve whose (static) layout slot it's
 // in — with hysteresis, so it only lets go when you clearly cross over.
 
-let liftedEl = null;
-function setLifted(el) {
-  if (liftedEl === el) return;
-  if (liftedEl) liftedEl.classList.remove("lifted");
-  liftedEl = el;
-  if (el) el.classList.add("lifted");
+let liftedIdx = null;
+function setLifted(idx) {
+  if (liftedIdx === idx) return;
+  if (liftedIdx !== null && mounted.has(liftedIdx)) mounted.get(liftedIdx).classList.remove("lifted");
+  liftedIdx = idx;
+  if (idx !== null && mounted.has(idx)) mounted.get(idx).classList.add("lifted");
 }
+const slotCenter = (i) => i * step + sleeveW / 2;
 function pickLifted(clientX) {
+  if (!step) return;
   // cursor X in the rack's own (unscrolled, untransformed) coordinates
   const x = clientX - rackWrap.getBoundingClientRect().left + rackWrap.scrollLeft - rack.offsetLeft;
-  let best = null, bestDist = Infinity, currentDist = Infinity;
-  for (const el of rows) {
-    const center = el.offsetLeft + el.offsetWidth / 2;
-    const dist = Math.abs(x - center);
-    if (dist < bestDist) { bestDist = dist; best = el; }
-    if (el === liftedEl) currentDist = dist;
-  }
+  let best = Math.max(0, Math.min(BEATS.length - 1, Math.round((x - sleeveW / 2) / step)));
   // hold the current pick unless the new one is clearly closer (40px says
   // "I've moved on", not "I drifted a hair past the midpoint")
-  if (liftedEl && best !== liftedEl && bestDist > currentDist - 40) return;
+  if (liftedIdx !== null && best !== liftedIdx &&
+      Math.abs(x - slotCenter(best)) > Math.abs(x - slotCenter(liftedIdx)) - 40) return;
   setLifted(best);
 }
 // keyboard focus lifts too (sleeves are tabbable buttons)
-rack.addEventListener("focusin", (e) => { const s = e.target.closest(".sleeve"); if (s) setLifted(s); });
+rack.addEventListener("focusin", (e) => {
+  const s = e.target.closest(".sleeve");
+  if (s) mounted.forEach((el, i) => { if (el === s) setLifted(i); });
+});
 rack.addEventListener("focusout", () => setLifted(null));
+
+// first paint of the static catalog (live beats trigger their own relayout)
+layoutRack();
 
 // ---------- live 5★ catalog from the BeatPlayer app ----------
 // The Windows BeatPlayer serves /api/beats with CORS open on GETs.
@@ -619,7 +672,7 @@ async function fetchLiveBeats() {
       const all = await res.json();
       liveBase = base;
       localStorage.setItem("bp-base", base);
-      return all.filter((b) => b.r === 5 && b.c === "Beat");
+      return all.filter((b) => b.r >= 4 && b.c === "Beat");
     } catch (e) { /* player offline on this base — try the next */ }
   }
   return null;
@@ -628,8 +681,8 @@ async function fetchLiveBeats() {
 function applyLive(fives) {
   if (!liveBase) return;
   let added = 0;
-  // newest exports first, so fresh heat lands at the front of the live block
-  [...fives].sort((a, b) => (b.d || "").localeCompare(a.d || "")).forEach((b) => {
+  // 5★ lead the live block, then 4★; newest exports first within each tier
+  [...fives].sort((a, b) => (b.r - a.r) || (b.d || "").localeCompare(a.d || "")).forEach((b) => {
     if (liveKeys.has(b.k)) return;
     const n = normTitle(b.t);
     if (staticNorms.some((s) => n.includes(s) || s.includes(n))) return; // already in the curated rack
@@ -651,10 +704,10 @@ function applyLive(fives) {
       year: parseInt((b.d || "").slice(0, 4), 10) || b.y,
       live: true,
     });
-    addSleeve(BEATS[BEATS.length - 1], BEATS.length - 1);
     added++;
   });
-  if (added) rows = [...rack.children];
+  // grow the rack's slot count + re-window; no per-beat DOM churn
+  if (added) layoutRack();
 }
 
 async function refreshLive() {

@@ -258,24 +258,23 @@ img { max-width: 100%; display: block; }
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
 }
 .rack {
-  display: flex;
-  align-items: flex-end;
-  width: max-content;
+  /* virtualized: width/height set from JS; sleeves absolutely positioned at
+     fixed slots so offscreen ones can be unmounted without shifting layout.
+     No shared perspective — each sleeve carries its own perspective() so
+     cards far from center don't flip past 90° into mirrored backfaces. */
+  position: relative;
   margin: 0 auto;
-  /* NOTE: no shared perspective — with a row this wide, cards far from the
-     vanishing point flip past 90° and show mirrored backfaces. Each sleeve
-     carries its own perspective() so every card leans identically. */
 }
 .sleeve {
   --lean: -63deg;      /* per-card jitter set inline from JS */
   --tilt: 0deg;
   --lift: 0px;
   --lean-scale: 1;
-  position: relative;
-  flex: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;             /* actual slot set inline from JS */
   width: clamp(220px, 25vw, 310px);
   aspect-ratio: 1;
-  margin-right: calc(clamp(220px, 25vw, 310px) * -0.56);
   cursor: pointer;
   transform: perspective(1000px)
              rotateY(calc(var(--lean) * var(--lean-scale)))
@@ -292,7 +291,6 @@ img { max-width: 100%; display: block; }
      (plain box-shadow composites for free) so each sleeve stays one GPU layer. */
   will-change: transform;
 }
-.sleeve:last-child { margin-right: 0; }
 /* lifted (JS-picked hover) / playing: the box lifts out of the row and swings
    flat to face the user. JS owns the pick — CSS :hover flickered because the
    lift moves the card out from under the cursor. */
@@ -437,7 +435,7 @@ footer {
   .nav-links a:not(:first-child) { display: none; }
   /* gentler fan on small screens so covers stay readable
      (JS sets --lean inline, so scale it instead of overriding) */
-  .sleeve { --lean-scale: 0.74; margin-right: calc(clamp(220px, 25vw, 310px) * -0.42); }
+  .sleeve { --lean-scale: 0.74; } /* gentler fan; slot spacing handled in JS */
   .turntable { flex-direction: column; text-align: center; gap: 20px; }
   .deck-side { max-width: none; }
   .now-buy, .deck-controls { justify-content: center; }
