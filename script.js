@@ -672,7 +672,7 @@ async function fetchLiveBeats() {
       const all = await res.json();
       liveBase = base;
       localStorage.setItem("bp-base", base);
-      return all.filter((b) => b.r >= 4 && b.c === "Beat");
+      return all.filter((b) => b.r === 5 && b.c === "Beat");
     } catch (e) { /* player offline on this base — try the next */ }
   }
   return null;

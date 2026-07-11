@@ -296,7 +296,9 @@ img { max-width: 100%; display: block; }
    lift moves the card out from under the cursor. */
 .sleeve.lifted, .sleeve.playing {
   transform: perspective(1000px) rotateY(0deg) rotateZ(0deg) translateY(-46px) translateZ(60px);
-  z-index: 999 !important;
+  /* must beat the base stack (9000 - i), or the neighbor paints over the
+     lifted card and covers it */
+  z-index: 99999 !important;
 }
 
 /* ---- the sleeve is a real box: front/back/spine/top/bottom faces ---- */
