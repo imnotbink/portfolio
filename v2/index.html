@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>imnotbink — Tyler Schrimper</title>
-  <meta name="description" content="imnotbink — Tyler Schrimper. Producer & digital creator. Beats, visuals, brand work." />
+  <meta name="description" content="imnotbink — Tyler Schrimper. Producer, engineer & designer. Beats, studio software, and visual work." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
@@ -15,84 +15,39 @@
   <nav class="nav">
     <a href="#top" class="logo">imnotbink</a>
     <div class="nav-links">
-      <a href="#visuals">Visuals</a>
-      <a href="#tools">Tools</a>
-      <a href="#catalog">Beats</a>
+      <a href="#work">Work</a>
+      <a href="#beats">Beats</a>
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
-      <a href="#catalog" class="nav-cta">buy a beat</a>
     </div>
   </nav>
 
-  <section id="beats" class="section beats-stage" >
-    <span class="anno anno-tl" aria-hidden="true">imnotbink® — beat catalog</span>
+  <!-- ===== HERO — editorial, Kurate-dark ===== -->
+  <header id="top" class="hero grid-bg">
+    <span class="anno anno-tl" aria-hidden="true">imnotbink®</span>
     <span class="anno anno-tr" aria-hidden="true">est. 2021 · chapel hill, nc</span>
-    <span class="anno anno-bl" aria-hidden="true" id="annoCount">side a</span>
-    <span class="anno anno-br" aria-hidden="true">scroll ↔ to dig · click to play</span>
-    <p class="tagline" id="top">Producer &amp; Engineer — Beats · Visuals · Brand Work</p>
-    <div class="hero-stack">
+    <span class="anno anno-bl" aria-hidden="true">portfolio — vol. 01</span>
+    <span class="anno anno-br" aria-hidden="true">scroll to begin ↓</span>
+    <div class="hero-inner">
+      <p class="kicker">Producer · Engineer · Designer</p>
       <h1 class="wordmark">imnotbink</h1>
-      <div class="rack-wrap">
-        <div class="rack" id="rack"></div>
-      </div>
-      <div class="wordmark wordmark-weave" aria-hidden="true">imnotbink</div>
+      <p class="statement">I make the beats, build the software that runs my studio, and design the visuals that wrap it all.</p>
+      <a class="scroll-cue" href="#work">Selected work <span aria-hidden="true">↓</span></a>
     </div>
-    <div class="turntable">
-      <div class="vinyl" id="vinyl">
-        <div class="platter" id="platter">
-          <div class="vinyl-label" id="vinylLabel"></div>
-        </div>
-        <div class="vinyl-sheen" aria-hidden="true"></div>
-      </div>
-      <div class="deck-side">
-        <div class="now">
-          <div class="now-title" id="nowTitle">drop the needle</div>
-          <div class="now-credit" id="nowCredit">click a sleeve · click the record to pause · drag to scratch</div>
-          <div class="wave-wrap" id="waveWrap" hidden>
-            <canvas id="wave" aria-label="Waveform — drag to scrub"></canvas>
-            <span class="wave-hover-time" id="waveHoverTime" hidden>0:00</span>
-          </div>
-          <div class="now-buy" id="nowBuy" hidden>
-            <span id="nowPrice"></span>
-            <a class="beat-buy" id="nowBuyLink" href="#">Buy this beat</a>
-          </div>
-        </div>
-        <div class="deck-controls">
-          <button class="deck-btn" id="speedDown" aria-label="Slow down">−</button>
-          <span class="deck-speed" id="speedLabel">1.00×</span>
-          <button class="deck-btn" id="speedUp" aria-label="Speed up">+</button>
-          <button class="deck-btn deck-shuffle" id="shuffleBtn" aria-pressed="false">shuffle</button>
-        </div>
-      </div>
-    </div>
-    <p class="note"><b>Buy</b> opens an email with the beat pre-filled · $30 lease, exclusives &amp; stems negotiable</p>
-  </section>
+  </header>
 
-  <section id="visuals" class="section">
-    <h2>Visuals</h2>
-    <div class="design-grid">
-      <figure>
-        <img src="img/addiction.png" alt="Infographic on social media addiction" loading="lazy" />
-        <figcaption>Addiction — editorial spread, InDesign &amp; Illustrator</figcaption>
-      </figure>
-      <figure>
-        <img src="img/frog.png" alt="Poison dart frog illustrated infographic" loading="lazy" />
-        <figcaption>Poison Dart Frogs — illustration &amp; information design</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section id="tools" class="section tools">
-    <div class="cat-head">
-      <h2>Tools I built</h2>
-      <p>Software I make for my own studio — shipped, open-source, on GitHub</p>
+  <!-- ===== SELECTED WORK — software + design, one gallery ===== -->
+  <section id="work" class="section work">
+    <div class="sec-head">
+      <h2>Selected Work</h2>
+      <span class="sec-note">software · sound · design</span>
     </div>
 
-    <div class="tool-grid">
+    <div class="work-grid">
 
-      <!-- ===== VitalsBar ===== -->
-      <article class="tool-card">
-        <div class="tool-shot shot-vitals">
+      <!-- VitalsBar -->
+      <article class="work-card">
+        <div class="work-shot shot-vitals">
           <div class="mac-menubar">
             <span class="mb-left">
               <span class="mb-apple"></span>
@@ -113,19 +68,20 @@
             <div class="vb-app vb-gpu"><span>Enable GPU Helper</span><span class="vb-chev">›</span></div>
           </div>
         </div>
-        <div class="tool-info">
+        <div class="work-info">
+          <span class="work-cat">Software · macOS</span>
           <h3>VitalsBar</h3>
-          <p>A tiny native menu bar meter for CPU, GPU &amp; memory. Click any metric for a top-5 breakdown — including per-app GPU usage, which most meters can't show.</p>
-          <div class="tool-foot">
-            <span class="tool-tags"><span>Swift</span><span>AppKit</span><span>macOS</span></span>
-            <a class="tool-link" href="https://github.com/imnotbink/VitalsBar" target="_blank" rel="noopener">GitHub ↗</a>
+          <p>A tiny native menu bar meter for CPU, GPU &amp; memory — with per-app GPU usage most meters can't show.</p>
+          <div class="work-foot">
+            <span class="tags"><span>Swift</span><span>AppKit</span></span>
+            <a class="work-link" href="https://github.com/imnotbink/VitalsBar" target="_blank" rel="noopener">GitHub ↗</a>
           </div>
         </div>
       </article>
 
-      <!-- ===== ProducerRadio ===== -->
-      <article class="tool-card">
-        <div class="tool-shot shot-radio">
+      <!-- ProducerRadio -->
+      <article class="work-card">
+        <div class="work-shot shot-radio">
           <div class="pr-popover">
             <div class="pr-head"><span class="pr-wave">♫</span> ProducerRadio</div>
             <div class="pr-art"><span class="pr-eq"><i></i><i></i><i></i><i></i><i></i></span></div>
@@ -139,19 +95,20 @@
             <div class="pr-chips"><span class="on">2026</span><span>Beats</span><span>@schell</span></div>
           </div>
         </div>
-        <div class="tool-info">
+        <div class="work-info">
+          <span class="work-cat">Software · macOS</span>
           <h3>ProducerRadio</h3>
-          <p>A menu bar radio station of your own catalog. Point it at your project folders and it finds the real bounces — skipping samples, collapsing version families, deduping — then shuffle-plays them.</p>
-          <div class="tool-foot">
-            <span class="tool-tags"><span>Swift</span><span>AVFoundation</span><span>macOS</span></span>
-            <a class="tool-link" href="https://github.com/imnotbink/ProducerRadio" target="_blank" rel="noopener">GitHub ↗</a>
+          <p>A menu bar radio of your own catalog — points at your project folders, finds the real bounces, and shuffle-plays them.</p>
+          <div class="work-foot">
+            <span class="tags"><span>Swift</span><span>AVFoundation</span></span>
+            <a class="work-link" href="https://github.com/imnotbink/ProducerRadio" target="_blank" rel="noopener">GitHub ↗</a>
           </div>
         </div>
       </article>
 
-      <!-- ===== GroupPitch ===== -->
-      <article class="tool-card">
-        <div class="tool-shot shot-pitch">
+      <!-- Group Pitch -->
+      <article class="work-card">
+        <div class="work-shot shot-pitch">
           <div class="m4l-device">
             <div class="m4l-title">Group Pitch</div>
             <div class="m4l-body">
@@ -175,12 +132,43 @@
             </div>
           </div>
         </div>
-        <div class="tool-info">
+        <div class="work-info">
+          <span class="work-cat">Max for Live</span>
           <h3>Group Pitch</h3>
-          <p>A Max for Live device: one knob on a Group track transposes the MIDI of every child track at once — non-destructively. Clip notes never move; turn it back to 0 and everything returns.</p>
-          <div class="tool-foot">
-            <span class="tool-tags"><span>Max for Live</span><span>JS</span><span>Live API</span></span>
-            <a class="tool-link" href="https://github.com/imnotbink/GroupPitch" target="_blank" rel="noopener">GitHub ↗</a>
+          <p>One knob on a Group track transposes the MIDI of every child track at once — non-destructively. Back to 0 and it all returns.</p>
+          <div class="work-foot">
+            <span class="tags"><span>Max</span><span>JS</span><span>Live API</span></span>
+            <a class="work-link" href="https://github.com/imnotbink/GroupPitch" target="_blank" rel="noopener">GitHub ↗</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Addiction — editorial design -->
+      <article class="work-card">
+        <div class="work-shot shot-img">
+          <img src="img/addiction.png" alt="Editorial infographic spread on social media addiction" loading="lazy" />
+        </div>
+        <div class="work-info">
+          <span class="work-cat">Editorial · Print</span>
+          <h3>Addiction</h3>
+          <p>An editorial spread on the mechanics of social-media addiction — research, layout, and data visualization.</p>
+          <div class="work-foot">
+            <span class="tags"><span>InDesign</span><span>Illustrator</span></span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Poison Dart Frogs — illustration -->
+      <article class="work-card">
+        <div class="work-shot shot-img">
+          <img src="img/frog.png" alt="Illustrated infographic about poison dart frogs" loading="lazy" />
+        </div>
+        <div class="work-info">
+          <span class="work-cat">Illustration · Infographic</span>
+          <h3>Poison Dart Frogs</h3>
+          <p>Illustration and information design — anatomy, habitat, and colour as a survival signal, drawn and typeset from scratch.</p>
+          <div class="work-foot">
+            <span class="tags"><span>Illustrator</span><span>InDesign</span></span>
           </div>
         </div>
       </article>
@@ -188,28 +176,66 @@
     </div>
   </section>
 
-  <section id="catalog" class="section catalog">
-    <div class="cat-head">
+  <!-- ===== BEATS — the fan lives here now ===== -->
+  <section id="beats" class="section beats grid-bg">
+    <span class="anno anno-tl" aria-hidden="true">the vault</span>
+    <span class="anno anno-tr" aria-hidden="true" id="annoCount">side a</span>
+    <div class="sec-head">
       <h2>Beats</h2>
-      <p>A slice of the crate — press play on the deck up top, or dig the full library here</p>
+      <span class="sec-note">click a sleeve · scratch the record · dig the crate</span>
     </div>
+
+    <div class="rack-wrap">
+      <div class="rack" id="rack"></div>
+    </div>
+
+    <div class="turntable">
+      <div class="vinyl" id="vinyl">
+        <div class="platter" id="platter">
+          <div class="vinyl-label" id="vinylLabel"></div>
+        </div>
+        <div class="vinyl-sheen" aria-hidden="true"></div>
+      </div>
+      <div class="deck-side">
+        <div class="now">
+          <div class="now-title" id="nowTitle">drop the needle</div>
+          <div class="now-credit" id="nowCredit">click a sleeve · click the record to pause · drag to scratch</div>
+          <div class="wave-wrap" id="waveWrap" hidden>
+            <canvas id="wave" aria-label="Waveform — drag to scrub"></canvas>
+            <span class="wave-hover-time" id="waveHoverTime" hidden>0:00</span>
+          </div>
+          <div class="now-buy" id="nowBuy" hidden>
+            <span id="nowPrice"></span>
+            <a class="beat-buy" id="nowBuyLink" href="#">License this beat</a>
+          </div>
+        </div>
+        <div class="deck-controls">
+          <button class="deck-btn" id="speedDown" aria-label="Slow down">−</button>
+          <span class="deck-speed" id="speedLabel">1.00×</span>
+          <button class="deck-btn" id="speedUp" aria-label="Speed up">+</button>
+          <button class="deck-btn deck-shuffle" id="shuffleBtn" aria-pressed="false">shuffle</button>
+        </div>
+      </div>
+    </div>
+
     <ol class="cat-list" id="catList"></ol>
     <p class="cat-foot" id="catFoot"></p>
   </section>
 
   <section id="about" class="section about">
-    <h2>About</h2>
+    <div class="sec-head"><h2>About</h2></div>
     <p>
       Producer and engineer out of Chapel Hill, NC. UNC Chapel Hill,
       Communication Studies ’25. Five years building @imnotbink —
       thousands of listeners, collabs across the internet, and a vault
-      of beats that never stops growing. Ableton, Pro Tools, the full
-      Adobe suite.
+      of beats that never stops growing. When I'm not making music I'm
+      building the tools that make it faster and designing the visuals
+      around it. Ableton, Pro Tools, Swift, the full Adobe suite.
     </p>
   </section>
 
   <section id="contact" class="section contact">
-    <h2>Contact</h2>
+    <div class="sec-head"><h2>Contact</h2></div>
     <p>
       <a href="mailto:tylerschrimper@gmail.com">tylerschrimper@gmail.com</a>
       <span>·</span>
@@ -217,7 +243,7 @@
     </p>
   </section>
 
-  <footer>© 2026 Tyler Schrimper</footer>
+  <footer>© 2026 Tyler Schrimper · imnotbink</footer>
 
   <div class="player-bar" id="playerBar" hidden>
     <button id="pbToggle" aria-label="Play/pause">▶</button>

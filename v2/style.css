@@ -37,72 +37,64 @@ img { max-width: 100%; display: block; }
 .nav-links a { color: var(--muted); font-size: 0.85rem; }
 .nav-links a:hover { color: var(--text); }
 
-.nav-cta {
-  color: var(--text) !important;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 6px 16px;
-  white-space: nowrap;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-.nav-cta:hover { background: var(--text); color: var(--bg) !important; border-color: var(--text); }
-
-/* ---------- hero: OCEAN-style editorial stage ---------- */
-.tagline {
-  text-align: center;
-  font-size: clamp(0.62rem, 1.4vw, 0.78rem);
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: clamp(18px, 3vh, 30px);
-}
-
-.hero-stack { position: relative; }
-
-/* wordmark: full-bleed editorial serif, the rack rides over its bottom */
-.wordmark {
-  text-align: center;
-  font-size: clamp(3.6rem, 13.5vw, 11.5rem);
-  font-weight: 340;
-  line-height: 0.94;
-  letter-spacing: -0.045em;
+/* ---------- section scaffolding ---------- */
+.section {
+  padding: clamp(56px, 9vh, 104px) clamp(20px, 5vw, 56px);
   position: relative;
-  z-index: 1;
-  /* small kiss of overlap only — the fan sits clearly BELOW the wordmark so a
-     lifted sleeve rises into open air, never over the letters */
-  margin-bottom: -0.06em;
-  pointer-events: none;
+  border-top: 1px solid var(--line);
 }
-
-/* woven duplicate: a clipped slice of the wordmark paints OVER the sleeves,
-   so the fan appears threaded through the letters (OCEAN move). Absolutely
-   positioned copy of the exact same glyphs — identical metrics = perfect
-   registration over the original. */
-.wordmark-weave {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  z-index: 3;
-  margin-bottom: 0;
-  font-family: "Fraunces", Georgia, serif;
-  clip-path: inset(0 71% 0 0);
+.sec-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap;
+  margin-bottom: clamp(28px, 4vh, 46px);
 }
+.sec-head h2 { font-size: clamp(1.7rem, 4vw, 2.7rem); font-weight: 340; letter-spacing: -0.02em; }
+.sec-note { color: var(--muted); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; }
 
-/* ---------- beats: turntable + crate ---------- */
-.section { padding: clamp(50px, 8vh, 90px) clamp(20px, 5vw, 56px); }
-
-.beats-stage {
-  position: relative;
-  overflow: clip;
-  border-bottom: 1px solid var(--line);
-  padding-top: clamp(40px, 7vh, 80px);
-  /* studio blueprint: soft spotlight behind the wordmark + faint drafting
-     grid on near-black. No photography — texture does the professional work. */
+/* Kurate blueprint: faint drafting grid + soft spotlight on near-black */
+.grid-bg {
   background:
-    radial-gradient(ellipse 62% 44% at 50% 26%, rgba(242, 237, 228, 0.055), transparent 70%),
-    repeating-linear-gradient(90deg, rgba(242, 237, 228, 0.028) 0 1px, transparent 1px 96px),
-    repeating-linear-gradient(0deg, rgba(242, 237, 228, 0.028) 0 1px, transparent 1px 96px),
-    #0b0a09;
+    radial-gradient(ellipse 60% 46% at 50% 30%, rgba(242,237,228,0.05), transparent 72%),
+    repeating-linear-gradient(90deg, rgba(242,237,228,0.026) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(0deg, rgba(242,237,228,0.026) 0 1px, transparent 1px 88px),
+    #0a0908;
 }
+
+/* ---------- HERO — editorial, Kurate-dark ---------- */
+.hero {
+  position: relative;
+  min-height: 92vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: clamp(90px, 13vh, 150px) clamp(20px, 5vw, 56px);
+  overflow: clip;
+}
+.hero-inner { text-align: center; max-width: 1100px; }
+.kicker {
+  font-size: clamp(0.6rem, 1.3vw, 0.76rem);
+  letter-spacing: 0.34em; text-transform: uppercase; color: var(--muted);
+  margin-bottom: clamp(22px, 3.5vh, 38px);
+}
+.wordmark {
+  font-family: "Fraunces", Georgia, serif; font-weight: 330;
+  font-size: clamp(3.4rem, 14vw, 12rem);
+  line-height: 0.9; letter-spacing: -0.05em;
+}
+.statement {
+  max-width: 26ch; margin: clamp(26px, 4vh, 42px) auto 0;
+  font-family: "Fraunces", Georgia, serif; font-weight: 300; font-style: italic;
+  font-size: clamp(1.05rem, 2.3vw, 1.55rem); line-height: 1.5; color: #cfc9bd;
+}
+.scroll-cue {
+  display: inline-block; margin-top: clamp(34px, 5vh, 54px);
+  font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px; padding: 9px 20px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.scroll-cue:hover { color: var(--text); border-color: var(--text); }
+.scroll-cue span { display: inline-block; margin-left: 5px; }
+
+/* ---------- beats section ---------- */
+.beats { position: relative; overflow: clip; }
 
 /* tiny drafting annotations pinned to the stage corners (Kurate move) */
 .anno {
@@ -494,15 +486,14 @@ img { max-width: 100%; display: block; }
   .cat-meta { display: none; }
 }
 
-/* ---------- tools: product showcase ---------- */
-.tools { border-bottom: 1px solid var(--line); }
-.tool-grid {
+/* ---------- selected work: product + design gallery ---------- */
+.work-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: clamp(20px, 3vw, 34px);
-  margin-top: 34px;
+  margin-top: 4px;
 }
-.tool-card {
+.work-card {
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow: hidden;
@@ -511,10 +502,10 @@ img { max-width: 100%; display: block; }
   flex-direction: column;
   transition: border-color 0.25s ease, transform 0.25s ease;
 }
-.tool-card:hover { border-color: #3a382f; transform: translateY(-3px); }
+.work-card:hover { border-color: #3a382f; transform: translateY(-3px); }
 
 /* the "product shot" stage — each app rendered on a subtle set */
-.tool-shot {
+.work-shot {
   position: relative;
   height: 288px;
   display: flex;
@@ -527,18 +518,25 @@ img { max-width: 100%; display: block; }
 .shot-vitals { background: radial-gradient(120% 120% at 50% 0%, #2a2d33, #0f1013); }
 .shot-radio  { background: radial-gradient(120% 120% at 50% 0%, #241c2e, #100c15); }
 .shot-pitch  { background: repeating-linear-gradient(0deg,#1a1a1a 0 23px,#161616 23px 24px); }
+/* design pieces: the artwork IS the shot */
+.shot-img { padding: 0; background: #0c0b0a; }
+.shot-img img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
 
-.tool-info { padding: 20px 22px 22px; flex: 1; display: flex; flex-direction: column; }
-.tool-info h3 { font-family: "Fraunces", Georgia, serif; font-weight: 400; font-size: 1.5rem; margin-bottom: 8px; }
-.tool-info p { color: var(--muted); font-size: 0.86rem; line-height: 1.6; }
-.tool-foot { margin-top: auto; padding-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.tool-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.tool-tags span {
+.work-info { padding: 20px 22px 22px; flex: 1; display: flex; flex-direction: column; }
+.work-cat {
+  font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 9px;
+}
+.work-info h3 { font-family: "Fraunces", Georgia, serif; font-weight: 400; font-size: 1.5rem; margin-bottom: 8px; }
+.work-info p { color: var(--muted); font-size: 0.86rem; line-height: 1.6; }
+.work-foot { margin-top: auto; padding-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tags span {
   font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px;
 }
-.tool-link { font-size: 0.8rem; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 1px; white-space: nowrap; }
-.tool-link:hover { border-color: var(--text); }
+.work-link { font-size: 0.8rem; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 1px; white-space: nowrap; }
+.work-link:hover { border-color: var(--text); }
 
 /* --- VitalsBar: macOS menu bar + popover --- */
 .mac-menubar {
@@ -684,7 +682,10 @@ footer {
 #pbTime { color: var(--muted); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
 
 @media (max-width: 700px) {
-  .nav-links a:not(:first-child):not(.nav-cta) { display: none; }
+  /* four short links fit; tighten spacing instead of hiding them */
+  .nav-links { gap: 15px; }
+  .nav-links a { font-size: 0.8rem; }
+  .logo { font-size: 1rem; }
   /* corner labels collide on narrow screens — drop to just the top-left tag */
   .anno-tr, .anno-bl, .anno-br { display: none; }
   .anno-tl { font-size: 0.56rem; }
