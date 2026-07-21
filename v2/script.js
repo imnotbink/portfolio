@@ -740,3 +740,137 @@ document.querySelector(".pb-track").addEventListener("click", (e) => {
   const d = duration();
   if (isFinite(d)) audio.currentTime = ((e.clientX - r.left) / r.width) * d;
 });
+
+/* ---------- lightbox: design work opens out of its own crop ----------
+   The card crops these spreads (object-fit: cover, top center). Instead of a
+   plain fade, we FLIP: the start rect is the *virtual* full-bleed geometry the
+   cropped image already has, so the artwork appears to unfold out of the card
+   rather than cross-dissolve into a new box. Uniform scale => no distortion. */
+const lb        = document.getElementById("lightbox");
+const lbFigure  = document.getElementById("lbFigure");
+const lbImg     = document.getElementById("lbImg");
+const lbCatEl   = document.getElementById("lbCat");
+const lbTitleEl = document.getElementById("lbTitle");
+const EASE      = "cubic-bezier(0.22, 1, 0.36, 1)";
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+let lbSource = null;   // the .shot-img button we opened from
+let lbBusy   = false;
+
+// where the uncropped image *would* sit, given object-fit:cover + top center
+function coverRect(box, nw, nh) {
+  const s = Math.max(box.width / nw, box.height / nh);
+  const w = nw * s, h = nh * s;
+  return { left: box.left + (box.width - w) / 2, top: box.top, width: w, height: h };
+}
+
+// where the full image should land: contained in the viewport, never upscaled
+function targetRect(nw, nh) {
+  const padX = Math.min(innerWidth * 0.06, 64);
+  const padTop = 72, padBottom = 96;          // room for the close btn + caption
+  const availW = Math.max(innerWidth - padX * 2, 1);
+  const availH = Math.max(innerHeight - padTop - padBottom, 1);
+  const s = Math.min(availW / nw, availH / nh, 1);
+  const w = nw * s, h = nh * s;
+  return { left: (innerWidth - w) / 2, top: padTop + (availH - h) / 2, width: w, height: h };
+}
+
+async function openLightbox(btn) {
+  if (lbBusy || lbSource) return;
+  const srcImg = btn.querySelector("img");
+  // these are lazy-loaded: a fast click can land before the image has decoded,
+  // and we need naturalWidth for the FLIP. Wait for it rather than no-op.
+  if (!srcImg.complete || !srcImg.naturalWidth) {
+    try { await srcImg.decode(); } catch (e) { return; }
+  }
+  const nw = srcImg.naturalWidth, nh = srcImg.naturalHeight;
+  if (!nw || !nh) return;
+
+  lbSource = btn;
+  lbImg.src = srcImg.currentSrc || srcImg.src;
+  lbImg.alt = srcImg.alt;
+  lbCatEl.textContent = btn.dataset.cat || "";
+  lbTitleEl.textContent = btn.dataset.title || "";
+
+  const end = targetRect(nw, nh);
+  Object.assign(lbFigure.style, {
+    left: end.left + "px", top: end.top + "px",
+    width: end.width + "px", height: end.height + "px",
+    transition: "none",
+  });
+
+  lb.hidden = false;
+  lb.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  if (reduceMotion.matches) {
+    lbFigure.style.transform = "none";
+    lb.classList.add("open");
+  } else {
+    const start = coverRect(btn.getBoundingClientRect(), nw, nh);
+    const k = start.width / end.width;
+    lbFigure.style.transform =
+      `translate(${start.left - end.left}px, ${start.top - end.top}px) scale(${k})`;
+    void lbFigure.offsetWidth;                // commit the inverted state
+    lbFigure.style.transition = `transform 0.62s ${EASE}`;
+    lbFigure.style.transform = "none";
+    // not in a rAF: it can be throttled to never in a background/embedded view,
+    // which would strand the figure with no backdrop. The reflow above is enough.
+    lb.classList.add("open");
+  }
+  document.getElementById("lbClose").focus({ preventScroll: true });
+}
+
+function closeLightbox() {
+  if (!lbSource || lbBusy) return;
+  const done = () => {
+    lb.hidden = true;
+    lb.setAttribute("aria-hidden", "true");
+    lbFigure.style.transition = "none";
+    lbImg.removeAttribute("src");
+    document.body.style.overflow = "";
+    lbSource.focus({ preventScroll: true });
+    lbSource = null;
+    lbBusy = false;
+  };
+
+  lbBusy = true;
+  lb.classList.remove("open");
+
+  if (reduceMotion.matches) { setTimeout(done, 200); return; }
+
+  // re-measure: the page may have scrolled while the viewer was open
+  const nw = lbImg.naturalWidth, nh = lbImg.naturalHeight;
+  const end = lbFigure.getBoundingClientRect();
+  const start = coverRect(lbSource.getBoundingClientRect(), nw, nh);
+  lbFigure.style.transition = `transform 0.5s ${EASE}`;
+  lbFigure.style.transform =
+    `translate(${start.left - end.left}px, ${start.top - end.top}px) scale(${start.width / end.width})`;
+
+  // transitionend won't fire if the transform didn't actually change (e.g. we
+  // closed before the open animation moved anything). Never strand the overlay.
+  let closed = false;
+  const settle = () => { if (!closed) { closed = true; done(); } };
+  lbFigure.addEventListener("transitionend", settle, { once: true });
+  setTimeout(settle, 600);
+}
+
+// keep the figure correct across viewport changes instead of tearing it down
+function relayoutLightbox() {
+  if (lb.hidden || lbBusy) return;
+  const end = targetRect(lbImg.naturalWidth, lbImg.naturalHeight);
+  Object.assign(lbFigure.style, {
+    left: end.left + "px", top: end.top + "px",
+    width: end.width + "px", height: end.height + "px",
+  });
+}
+
+document.querySelectorAll("[data-zoom]").forEach((btn) =>
+  btn.addEventListener("click", () => openLightbox(btn))
+);
+document.getElementById("lbBackdrop").addEventListener("click", closeLightbox);
+document.getElementById("lbClose").addEventListener("click", closeLightbox);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !lb.hidden) closeLightbox();
+});
+addEventListener("resize", relayoutLightbox);

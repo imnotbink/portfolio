@@ -143,11 +143,45 @@
         </div>
       </article>
 
+      <!-- LivePaper -->
+      <article class="work-card">
+        <div class="work-shot shot-livepaper">
+          <div class="lp-window">
+            <div class="lp-side">
+              <span class="lp-brand">LivePaper</span>
+              <span class="lp-nav on"><i></i>Discover</span>
+              <span class="lp-nav lp-online"><i></i>Browse 4K</span>
+              <span class="lp-nav"><i></i>Shuffle</span>
+              <span class="lp-tag">Local Library</span>
+            </div>
+            <div class="lp-grid">
+              <span class="lp-tile lp-a sel"><b class="lp-fps">30 fps</b></span>
+              <span class="lp-tile lp-b"></span>
+              <span class="lp-tile lp-c"></span>
+              <span class="lp-tile lp-d"></span>
+              <span class="lp-tile lp-e"></span>
+              <span class="lp-tile lp-f"></span>
+            </div>
+          </div>
+        </div>
+        <div class="work-info">
+          <span class="work-cat">Software · macOS</span>
+          <h3>LivePaper</h3>
+          <p>Live video wallpapers for the desktop and lock screen — and a decoder that releases itself the moment nothing is actually watching.</p>
+          <div class="work-foot">
+            <span class="tags"><span>Swift</span><span>AppKit</span><span>AVFoundation</span></span>
+          </div>
+        </div>
+      </article>
+
       <!-- Addiction — editorial design -->
       <article class="work-card">
-        <div class="work-shot shot-img">
+        <button class="work-shot shot-img" data-zoom
+                data-title="Addiction" data-cat="Editorial · Print"
+                aria-label="View “Addiction” full size">
           <img src="img/addiction.png" alt="Editorial infographic spread on social media addiction" loading="lazy" />
-        </div>
+          <span class="zoom-cue" aria-hidden="true">⤢ View full</span>
+        </button>
         <div class="work-info">
           <span class="work-cat">Editorial · Print</span>
           <h3>Addiction</h3>
@@ -160,9 +194,12 @@
 
       <!-- Poison Dart Frogs — illustration -->
       <article class="work-card">
-        <div class="work-shot shot-img">
+        <button class="work-shot shot-img" data-zoom
+                data-title="Poison Dart Frogs" data-cat="Illustration · Infographic"
+                aria-label="View “Poison Dart Frogs” full size">
           <img src="img/frog.png" alt="Illustrated infographic about poison dart frogs" loading="lazy" />
-        </div>
+          <span class="zoom-cue" aria-hidden="true">⤢ View full</span>
+        </button>
         <div class="work-info">
           <span class="work-cat">Illustration · Infographic</span>
           <h3>Poison Dart Frogs</h3>
@@ -252,6 +289,19 @@
       <div class="pb-track"><div class="pb-progress" id="pbProgress"></div></div>
     </div>
     <span id="pbTime">0:00</span>
+  </div>
+
+  <!-- ===== lightbox — design work, full size ===== -->
+  <div class="lightbox" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Artwork viewer">
+    <div class="lb-backdrop" id="lbBackdrop"></div>
+    <figure class="lb-figure" id="lbFigure">
+      <img id="lbImg" alt="" />
+    </figure>
+    <figcaption class="lb-caption" id="lbCaption">
+      <span class="lb-cat" id="lbCat"></span>
+      <span class="lb-title" id="lbTitle"></span>
+    </figcaption>
+    <button class="lb-close" id="lbClose" aria-label="Close viewer">esc ✕</button>
   </div>
 
   <script src="script.js"></script>
