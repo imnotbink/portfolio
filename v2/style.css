@@ -429,7 +429,8 @@ img { max-width: 100%; display: block; }
 .cat-row {
   width: 100%;
   display: grid;
-  grid-template-columns: 3ch 1fr auto auto;
+  /* idx · title · credit/meta · stars · made-date · price */
+  grid-template-columns: 3ch 1fr auto auto auto auto;
   align-items: baseline;
   gap: clamp(14px, 3vw, 34px);
   padding: 13px 6px;
@@ -482,7 +483,8 @@ img { max-width: 100%; display: block; }
 }
 .cat-row:hover .cat-price { color: var(--text); border-color: var(--text); }
 @media (max-width: 700px) {
-  .cat-row { grid-template-columns: 3ch 1fr auto; }
+  /* idx · title · date — the date stays, it is what the list is ordered by */
+  .cat-row { grid-template-columns: 3ch 1fr auto; gap: 12px; }
   .cat-meta { display: none; }
 }
 
@@ -518,7 +520,7 @@ img { max-width: 100%; display: block; }
 .shot-vitals { background: radial-gradient(120% 120% at 50% 0%, #2a2d33, #0f1013); }
 .shot-radio  { background: radial-gradient(120% 120% at 50% 0%, #241c2e, #100c15); }
 .shot-pitch  { background: repeating-linear-gradient(0deg,#1a1a1a 0 23px,#161616 23px 24px); }
-/* --- LivePaper: the video library window --- */
+/* --- Vivarium: the video library window --- */
 .shot-livepaper { background: radial-gradient(120% 120% at 50% 0%, #1b2430, #0b0e12); }
 .lp-window {
   width: 268px; height: 186px; display: flex; overflow: hidden;
@@ -821,4 +823,55 @@ footer {
   .turntable { flex-direction: column; text-align: center; gap: 20px; }
   .deck-side { max-width: none; }
   .now-buy, .deck-controls { justify-content: center; }
+}
+
+
+/* ---------- star switches + the dated catalog row ---------- */
+/* The switches sit with the deck controls and read as part of the same
+   row of buttons; "off" is the flat state, so the crate's contents are
+   legible at a glance without reading the labels. */
+
+.star-switches {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: 10px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.star-btn {
+  min-width: 46px;
+  letter-spacing: 0.5px;
+  opacity: 0.45;
+}
+
+.star-btn.on {
+  opacity: 1;
+  border-color: currentColor;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+/* The row gains two columns: the rating and the date it was made. Both are
+   quiet — they are for scanning down the list, not for reading one row. */
+.cat-stars {
+  font-size: 11px;
+  letter-spacing: 1px;
+  opacity: 0.55;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.cat-date {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  opacity: 0.5;
+  white-space: nowrap;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  /* narrow rows drop the stars (the switches above already say which tiers
+     are in the crate) and the price pill, keeping title + date */
+  .cat-stars, .cat-price { display: none; }
+  .star-switches { margin-left: 0; padding-left: 0; border-left: 0; }
 }

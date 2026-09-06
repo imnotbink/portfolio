@@ -1,28 +1,83 @@
 // imnotbink — vinyl turntable + crate. One shared audio player.
 // Catalog: the Desktop "for sell type shit" exports. Credit format is
 // always "prod. imnotbink" first, collabs joined with ×.
+//
+// Two arrays, on purpose:
+//   LIBRARY — every beat we know about (these + everything 4★/5★ in the player)
+//   BEATS   — what is on screen right now: LIBRARY filtered by the star
+//             switches and sorted newest-made first.
+// Everything that draws (rack, catalog, deck, shuffle) indexes BEATS, so
+// changing the filter is just rebuilding that one array.
 
-const BEATS = [
-  { file: "beats/ender.mp3",            title: "ender",            meta: "155 BPM · E min",  prod: ["imnotbink", "schell"] },
-  { file: "beats/spaz.mp3",             title: "spaz",             meta: "126 BPM · E maj",  prod: ["imnotbink"] },
-  { file: "beats/hairbrush.mp3",        title: "hairbrush",        meta: "141 BPM · D♯ min", prod: ["imnotbink", "schell", "dxnieldior"] },
-  { file: "beats/jukuri.mp3",           title: "jukuri",           meta: "174 BPM · A min",  prod: ["imnotbink", "zouni"] },
-  { file: "beats/popit.mp3",            title: "popit",            meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/relentless-hope.mp3",  title: "relentless hope",  meta: "",                 prod: ["imnotbink", "schell"] },
-  { file: "beats/umbrae-loquuntur.mp3", title: "umbrae loquuntur", meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/boomerang.mp3",        title: "boomerang",        meta: "140 BPM · F♯ min", prod: ["imnotbink"] },
-  { file: "beats/coupe.mp3",            title: "coupe",            meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/digital-runner.mp3",   title: "digital runner",   meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/grail.mp3",            title: "grail",            meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/tethered.mp3",         title: "tethered",         meta: "148 BPM · A maj",  prod: ["imnotbink", "rioleyva", "vendr"] },
-  { file: "beats/in-elsewhere.mp3",     title: "in elsewhere",     meta: "152 BPM",          prod: ["imnotbink", "praizewa"] },
-  { file: "beats/natural.mp3",          title: "natural",          meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/pretty.mp3",           title: "pretty",           meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/run-run.mp3",          title: "run run",          meta: "140 BPM",          prod: ["imnotbink", "praizewa"] },
-  { file: "beats/silver.mp3",           title: "silver",           meta: "147 BPM · A maj",  prod: ["imnotbink"] },
-  { file: "beats/stampede.mp3",         title: "stampede",         meta: "",                 prod: ["imnotbink"] },
-  { file: "beats/timetraveler.m4a",     title: "timetraveler",     meta: "140 BPM · A maj",  prod: ["imnotbink"] },
-];
+const LIBRARY = [
+  { file: "beats/ender.mp3",            title: "ender",            meta: "155 BPM · E min",  prod: ["imnotbink", "schell"], made: "2026-02-28" },
+  { file: "beats/spaz.mp3",             title: "spaz",             meta: "126 BPM · E maj",  prod: ["imnotbink"], made: "2025-02-03" },
+  { file: "beats/hairbrush.mp3",        title: "hairbrush",        meta: "141 BPM · D♯ min", prod: ["imnotbink", "schell", "dxnieldior"], made: "2025-11-29" },
+  { file: "beats/jukuri.mp3",           title: "jukuri",           meta: "174 BPM · A min",  prod: ["imnotbink", "zouni"], made: "2026-01-18" },
+  { file: "beats/popit.mp3",            title: "popit",            meta: "",                 prod: ["imnotbink"], made: "2025-07-31" },
+  { file: "beats/relentless-hope.mp3",  title: "relentless hope",  meta: "",                 prod: ["imnotbink", "schell"], made: "2025-01-04" },
+  { file: "beats/umbrae-loquuntur.mp3", title: "umbrae loquuntur", meta: "",                 prod: ["imnotbink"], made: "2026-03-18" },
+  { file: "beats/boomerang.mp3",        title: "boomerang",        meta: "140 BPM · F♯ min", prod: ["imnotbink"], made: "2026-06-30" },
+  { file: "beats/coupe.mp3",            title: "coupe",            meta: "",                 prod: ["imnotbink"], made: "2025-05-11" },
+  { file: "beats/digital-runner.mp3",   title: "digital runner",   meta: "",                 prod: ["imnotbink"], made: "2024-06-30" },
+  { file: "beats/grail.mp3",            title: "grail",            meta: "",                 prod: ["imnotbink"], made: "2026-01-13" },
+  { file: "beats/tethered.mp3",         title: "tethered",         meta: "148 BPM · A maj",  prod: ["imnotbink", "rioleyva", "vendr"], made: "2026-05-05" },
+  { file: "beats/in-elsewhere.mp3",     title: "in elsewhere",     meta: "152 BPM",          prod: ["imnotbink", "praizewa"], made: "2026-01-16" },
+  { file: "beats/natural.mp3",          title: "natural",          meta: "",                 prod: ["imnotbink"], made: "" },
+  { file: "beats/pretty.mp3",           title: "pretty",           meta: "",                 prod: ["imnotbink"], made: "2024-07-26" },
+  { file: "beats/run-run.mp3",          title: "run run",          meta: "140 BPM",          prod: ["imnotbink", "praizewa"], made: "2026-01-02" },
+  { file: "beats/silver.mp3",           title: "silver",           meta: "147 BPM · A maj",  prod: ["imnotbink"], made: "2024-07-14" },
+  { file: "beats/stampede.mp3",         title: "stampede",         meta: "",                 prod: ["imnotbink"], made: "2025-09-29" },
+  { file: "beats/timetraveler.m4a",     title: "timetraveler",     meta: "140 BPM · A maj",  prod: ["imnotbink"], made: "2025-09-14" },
+].map((b) => ({ ...b, stars: 5 }));   // the hand-picked rack is all 5★
+
+// The on-screen crate. Rebuilt by applyFilter(); never assigned, only spliced,
+// so every BEATS[i] reference elsewhere keeps pointing at the live array.
+const BEATS = [];
+
+// ---------- when a beat was actually made ----------
+// The player dates a beat by the file's timestamp on the PC, and an HTTP
+// upload writes a brand new file — so everything BinkRadio has ever sent
+// reads as the day it was SENT (that is the block of 2026-07-06s, and a
+// fresh block on every sweep day since). Ordering the crate by that is
+// ordering it by upload batch, which is not an order at all.
+//
+// beat-dates.json is generated off the Mac libraries, where the filing
+// (<year>/<Month>/, and "2025 February/" in the iCloud archive) is the
+// ground truth for when a beat was made. Normalized title -> YYYY-MM-DD.
+// Anything not in the map keeps the player's own date.
+let MADE = {};
+const normTitle = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+function madeDate(title, fallback) {
+  const n = normTitle(title);
+  return MADE[n] || fallback || "";
+}
+
+// ---------- star filter + the on-screen ordering ----------
+// The switches pick which tiers are in the crate; inside the crate the
+// order is always newest-made first. Shuffle draws from exactly what is
+// on screen, so "5★ only" shuffles only 5★ beats.
+
+const stars = new Set(
+  (localStorage.getItem("bp-stars") || "4,5").split(",").map(Number).filter(Boolean)
+);
+let currentBeat = null;   // survives a rebuild; index does not
+
+function applyFilter() {
+  const keep = LIBRARY
+    .filter((b) => stars.has(b.stars))
+    .sort((a, b) => (b.made || "").localeCompare(a.made || "") || a.title.localeCompare(b.title));
+  BEATS.splice(0, BEATS.length, ...keep);
+  // The playing beat has a new index now, or has been filtered off screen —
+  // it keeps playing either way, so hold on to it: switching its tier back on
+  // puts the needle back on the right row instead of losing the track.
+  current = currentBeat ? BEATS.indexOf(currentBeat) : -1;
+  syncStarButtons();
+  layoutRack();
+  renderCatalog();
+  render();
+}
 
 const PRICE = 30;
 const EMAIL = "tylerschrimper@gmail.com";
@@ -267,6 +322,7 @@ document.getElementById("speedDown").addEventListener("click", () => setRate(rat
 document.getElementById("speedUp").addEventListener("click", () => setRate(rate + 0.25));
 
 function randomIndex() {
+  if (!BEATS.length) return -1;
   if (BEATS.length < 2) return 0;
   let i;
   do { i = Math.floor(Math.random() * BEATS.length); } while (i === current);
@@ -275,13 +331,34 @@ function randomIndex() {
 shuffleBtn.addEventListener("click", () => {
   shuffle = !shuffle;
   shuffleBtn.setAttribute("aria-pressed", String(shuffle));
-  if (shuffle) toggle(randomIndex());
+  // shuffle draws from BEATS, which is only the selected tiers — turning
+  // 4★ off mid-shuffle means 4★ beats stop coming up
+  const i = randomIndex();
+  if (shuffle && i >= 0) toggle(i);
 });
 
-// show the first record on the platter before anything plays
-loadLabel(0);
+// ---------- star switches ----------
+
+const starBtns = [...document.querySelectorAll(".star-btn")];
+function syncStarButtons() {
+  starBtns.forEach((btn) => {
+    const on = stars.has(Number(btn.dataset.stars));
+    btn.setAttribute("aria-pressed", String(on));
+    btn.classList.toggle("on", on);
+  });
+}
+starBtns.forEach((btn) => btn.addEventListener("click", () => {
+  const n = Number(btn.dataset.stars);
+  if (stars.has(n)) stars.delete(n); else stars.add(n);
+  if (!stars.size) stars.add(n);   // never leave the crate with nothing in it
+  localStorage.setItem("bp-stars", [...stars].join(","));
+  applyFilter();
+}));
+
+
 
 function loadLabel(i) {
+  if (!BEATS[i]) { vinylLabel.innerHTML = ""; return; }
   vinylLabel.innerHTML = labelSVG(BEATS[i], i);
   // tint the pressing to match the beat's palette accent
   vinyl.style.setProperty("--tint", PALETTES[i % PALETTES.length][1]);
@@ -293,6 +370,7 @@ function toggle(i) {
   } else {
     if (current !== i) {
       current = i;
+      currentBeat = BEATS[i];
       audio.src = BEATS[i].file;
       audio.playbackRate = rate;
       loadLabel(i);
@@ -337,7 +415,9 @@ audio.addEventListener("timeupdate", () => {
 audio.addEventListener("play", render);
 audio.addEventListener("pause", render);
 audio.addEventListener("ended", () => {
-  // auto-advance: shuffle picks anything, otherwise next in the rack
+  if (!BEATS.length) return;
+  // auto-advance: shuffle picks anything in the filtered crate, otherwise
+  // the next beat down the list (which is the next one older)
   toggle(shuffle ? randomIndex() : (current + 1) % BEATS.length);
 });
 
@@ -511,19 +591,31 @@ waveCanvas.addEventListener("pointerleave", () => {
 const catList = document.getElementById("catList");
 const annoCount = document.getElementById("annoCount");
 
+// "6 May 26" — short enough to sit in a row, unambiguous about the year
+const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function madeLabel(made) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(made || "");
+  if (!m) return "—";   // nothing on either library says when this one was made
+  return `${Number(m[3])} ${MONTH_SHORT[Number(m[2]) - 1]} ${m[1].slice(2)}`;
+}
+
 function renderCatalog() {
+  // BEATS is already newest-made first — the list is just that order, printed.
   catList.innerHTML = BEATS.map((b, i) => `
     <li>
       <button class="cat-row${i === current ? " playing" : ""}" data-i="${i}" type="button" aria-label="Play ${b.title}">
         <span class="cat-idx">${String(i + 1).padStart(2, "0")}</span>
         <span class="cat-title">${b.title}</span>
         <span class="cat-meta">${credit(b)}${b.meta ? " · " + b.meta : ""}</span>
+        <span class="cat-stars" aria-label="${b.stars} stars">${"★".repeat(b.stars || 0)}</span>
+        <span class="cat-date">${madeLabel(b.made)}</span>
         <span class="cat-price">$${PRICE} lease</span>
       </button>
     </li>`).join("");
+  const tiers = [...stars].sort().join("★/") + "★";
   if (annoCount) annoCount.textContent = `side a — ${BEATS.length} pressings`;
   const catFoot = document.getElementById("catFoot");
-  if (catFoot) catFoot.innerHTML = `${BEATS.length} beats in the crate · scroll the list to dig · <a href="mailto:${EMAIL}?subject=${encodeURIComponent("Beats — let's talk")}">get in touch to license</a>`;
+  if (catFoot) catFoot.innerHTML = `${BEATS.length} ${tiers} beats in the crate · newest first · <a href="mailto:${EMAIL}?subject=${encodeURIComponent("Beats — let's talk")}">get in touch to license</a>`;
 }
 catList.addEventListener("click", (e) => {
   const row = e.target.closest(".cat-row");
@@ -603,9 +695,22 @@ rack.addEventListener("focusin", (e) => {
 });
 rack.addEventListener("focusout", () => setLifted(null));
 
-// first paint of the static catalog (live beats trigger their own relayout)
-layoutRack();
-renderCatalog();
+// First paint. The made-dates have to be in hand before anything is sorted,
+// so the crate is never briefly shown in the wrong order; if the file is
+// missing the page still works, it just falls back to the player's dates.
+(async function boot() {
+  try {
+    const res = await fetch("beat-dates.json", { cache: "no-cache" });
+    if (res.ok) MADE = await res.json();
+  } catch (e) { /* no map: player dates stand */ }
+  LIBRARY.forEach((b) => {
+    b.made = madeDate(b.title, b.made);
+    b.year = parseInt(b.made.slice(0, 4), 10) || b.year;   // sleeve/label stamp
+  });
+  applyFilter();
+  loadLabel(0);
+  refreshLive();
+})();
 
 // ---------- live 5★ catalog from the BeatPlayer app ----------
 // The Windows BeatPlayer serves /api/beats with CORS open on GETs.
@@ -619,9 +724,10 @@ const LIVE_BASES = [
 let liveBase = localStorage.getItem("bp-base");
 const liveKeys = new Set();
 const liveNorms = new Set();
-const normTitle = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-// snapshot of the hand-curated catalog, for dedupe
-const staticNorms = BEATS.map((b) => normTitle(b.title));
+// snapshot of the hand-curated catalog, for dedupe. Off LIBRARY, not BEATS:
+// BEATS is whatever the star filter is showing right now, and a beat filtered
+// off screen must still count as already-in-the-rack.
+const staticNorms = LIBRARY.map((b) => normTitle(b.title));
 
 // raw player titles look like "@imnotbink Spaz Emaj 126bpm" — clean them
 // down to the beat name, mine BPM + key for the meta line, and turn any
@@ -682,7 +788,9 @@ async function fetchLiveBeats() {
       const all = await res.json();
       liveBase = base;
       localStorage.setItem("bp-base", base);
-      return all.filter((b) => b.r === 5 && b.c === "Beat");
+      // 4★ and 5★ both come down; the star switches on the page decide
+      // which of them is on screen.
+      return all.filter((b) => (b.r === 5 || b.r === 4) && b.c === "Beat");
     } catch (e) { /* player offline on this base — try the next */ }
   }
   return null;
@@ -691,7 +799,8 @@ async function fetchLiveBeats() {
 function applyLive(fives) {
   if (!liveBase) return;
   let added = 0;
-  // 5★ lead the live block, then 4★; newest exports first within each tier
+  // order here only decides who wins a dedupe race — the crate's real
+  // ordering is applyFilter()'s, by made-date
   [...fives].sort((a, b) => (b.r - a.r) || (b.d || "").localeCompare(a.d || "")).forEach((b) => {
     if (liveKeys.has(b.k)) return;
     const n = normTitle(b.t);
@@ -706,18 +815,25 @@ function applyLive(fives) {
         .map((w) => KNOWN_COLLABS[w.toLowerCase()] !== undefined ? KNOWN_COLLABS[w.toLowerCase()] : w)
         .filter((w) => w && normTitle(w) !== "imnotbink")
     )];
-    BEATS.push({
+    // b.d is the player's file date — right for beats that have always
+    // lived on the PC, wrong for everything BinkRadio uploaded. The map
+    // wins wherever it has an answer, keyed on the raw player title
+    // (the export's filename) as well as the cleaned-up one.
+    const made = MADE[normTitle(b.t)] || MADE[normTitle(parsed.title)] || b.d || "";
+    LIBRARY.push({
       file: liveBase + "/audio/" + b.k,
       title: parsed.title,
       meta: parsed.meta,
       prod: ["imnotbink", ...cred],
-      year: parseInt((b.d || "").slice(0, 4), 10) || b.y,
+      stars: b.r,
+      made,
+      year: parseInt(made.slice(0, 4), 10) || b.y,
       live: true,
     });
     added++;
   });
   // grow the rack's slot count + re-window; no per-beat DOM churn
-  if (added) { layoutRack(); renderCatalog(); }
+  if (added) applyFilter();
 }
 
 async function refreshLive() {
@@ -730,7 +846,6 @@ async function refreshLive() {
     try { applyLive(JSON.parse(localStorage.getItem("bp-fives") || "[]")); } catch (e) {}
   }
 }
-refreshLive();
 setInterval(refreshLive, 60000); // newly 5-starred beats appear within a minute
 document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshLive(); });
 

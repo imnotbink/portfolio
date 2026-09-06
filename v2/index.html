@@ -143,16 +143,16 @@
         </div>
       </article>
 
-      <!-- LivePaper -->
+      <!-- Vivarium -->
       <article class="work-card">
         <div class="work-shot shot-livepaper">
           <div class="lp-window">
             <div class="lp-side">
-              <span class="lp-brand">LivePaper</span>
+              <span class="lp-brand">Vivarium</span>
               <span class="lp-nav on"><i></i>Discover</span>
-              <span class="lp-nav lp-online"><i></i>Browse 4K</span>
-              <span class="lp-nav"><i></i>Shuffle</span>
-              <span class="lp-tag">Local Library</span>
+              <span class="lp-nav lp-online"><i></i>Browse</span>
+              <span class="lp-nav"><i></i>Create</span>
+              <span class="lp-tag">Library</span>
             </div>
             <div class="lp-grid">
               <span class="lp-tile lp-a sel"><b class="lp-fps">30 fps</b></span>
@@ -166,8 +166,8 @@
         </div>
         <div class="work-info">
           <span class="work-cat">Software · macOS</span>
-          <h3>LivePaper</h3>
-          <p>Live video wallpapers for the desktop and lock screen — and a decoder that releases itself the moment nothing is actually watching.</p>
+          <h3>Vivarium</h3>
+          <p>Live video wallpapers for the desktop and lock screen — any video becomes a seamless loop, and the decoder releases itself the moment nothing is actually watching.</p>
           <div class="work-foot">
             <span class="tags"><span>Swift</span><span>AppKit</span><span>AVFoundation</span></span>
           </div>
@@ -220,6 +220,7 @@
     <div class="sec-head">
       <h2>Beats</h2>
       <span class="sec-note">click a sleeve · scratch the record · dig the crate</span>
+      <span class="sec-note">pick 4★ / 5★ to set the crate — shuffle draws from it, the list runs newest first</span>
     </div>
 
     <div class="rack-wrap">
@@ -251,6 +252,10 @@
           <span class="deck-speed" id="speedLabel">1.00×</span>
           <button class="deck-btn" id="speedUp" aria-label="Speed up">+</button>
           <button class="deck-btn deck-shuffle" id="shuffleBtn" aria-pressed="false">shuffle</button>
+          <span class="star-switches" role="group" aria-label="Which ratings are in the crate">
+            <button class="deck-btn star-btn" data-stars="5" aria-pressed="true">5★</button>
+            <button class="deck-btn star-btn" data-stars="4" aria-pressed="true">4★</button>
+          </span>
         </div>
       </div>
     </div>
